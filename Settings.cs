@@ -51,8 +51,8 @@ namespace ScreenSaver
 				parentKey = key;
 			}
 
-			var paths = (string)parentKey.GetValue(ImagePathsKeyName, "C:\\Users\\liew343241\\Pictures\\刘琦宝贝\\");
-			_paths = paths.Split(new[] { ' ' }).ToList();
+			var paths = (string)parentKey.GetValue(ImagePathsKeyName, Environment.ExpandEnvironmentVariables("%UserProfile%\\Pictures\\"));
+			_paths = paths.Split(new[] { ',' }).ToList();
 			Interval = (int)parentKey.GetValue(IntervalKeyName, 5);
 		}
 	}

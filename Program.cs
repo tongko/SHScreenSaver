@@ -11,9 +11,6 @@ namespace ScreenSaver
 	{
 		internal const string MutexName = "ScreenSaver-36e07bf4-8628-4aa7-9aa6-428f9ba7f192";
 		private static Mutex _mutex;
-		private static EventLogger Log = EventLogger.Instance;
-
-		public Mutex ExecutingFlag { get; private set; }
 
 		/// <summary>
 		/// The main entry point for the application.
@@ -55,11 +52,48 @@ namespace ScreenSaver
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-
-			ExecutingFlag = new Mutex(true, MutexName + "Running");
 		}
 
 		private void Run()
+		{
+			switch (Settings.Instance.DisplayMode)
+			{
+				case DisplayModes.ShowConfig:
+					break;
+				case DisplayModes.ShowPreview:
+					RunPreview();
+					break;
+				case DisplayModes.ShowSaver:
+					RunFullScreen();
+					break;
+				default:
+					break;
+			}
+		}
+
+		private void RunFullScreen()
+		{
+			var screens = Screen.AllScreens;
+			for (int i = 0; i < screens.Length; i++)
+			{
+				if (screens[i] == Screen.PrimaryScreen)
+					continue;
+
+				var thread = new Thread(new ParameterizedThreadStart(StartFullScreen));
+				thread.TrySetApartmentState(ApartmentState.STA);
+				thread.Start(i);
+			}
+
+			Application.Run(new FullScreenWindow(0, Cursor.Position));
+		}
+
+		private void StartFullScreen(object parameter)
+		{
+			int monIndex = (int)parameter;
+			Application.Run(new FullScreenWindow(monIndex, Cursor.Position));
+		}
+
+		private void RunPreview()
 		{
 			var pWnd = new PreviewWindow(Settings.Instance.ParentHandle);
 			pWnd.Run();
@@ -67,11 +101,17 @@ namespace ScreenSaver
 
 		private static void InitTrace()
 		{
+			var dir = Environment.ExpandEnvironmentVariables("%APPDATA%\\SinHing\\");
+			if (!System.IO.Directory.Exists(dir))
+				System.IO.Directory.CreateDirectory(Environment.ExpandEnvironmentVariables(dir));
+			if (!System.IO.Directory.Exists(dir + "Logs"))
+				System.IO.Directory.CreateDirectory(Environment.ExpandEnvironmentVariables(dir + "Logs"));
+
 			System.Diagnostics.Trace.Listeners.Clear();
 			System.Diagnostics.Trace.Listeners.Add(
-				new System.Diagnostics.TextWriterTraceListener(Environment.ExpandEnvironmentVariables("%APPDATA%\\SinHing\\Logs\\Trace.log")));
-			System.Diagnostics.Trace.Listeners.Add(
-				new System.Diagnostics.EventLogTraceListener("Sin Hing Screen Saver"));
+				new System.Diagnostics.TextWriterTraceListener(dir + "Logs\\Trace.log"));
+			//System.Diagnostics.Trace.Listeners.Add(
+			//	new System.Diagnostics.EventLogTraceListener("Sin Hing Screen Saver"));
 			System.Diagnostics.Trace.AutoFlush = true;
 			System.Diagnostics.Trace.TraceInformation("Trace start: {0}", DateTime.Now);
 		}

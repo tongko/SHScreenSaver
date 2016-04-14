@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ScreenSaver
 {
 	class ArgumentsParser
 	{
-		private static EventLogger Log = EventLogger.Instance;
 		private List<string> _args;
 
 		static ArgumentsParser()
@@ -24,7 +22,7 @@ namespace ScreenSaver
 
 		public void Parse(string[] args)
 		{
-			Log.WriteInfo("Arguments: \r\n" + string.Join("|", args));
+			Trace.TraceInformation("Arguments: {0}", string.Join("|", args));
 
 			_args = args.ToList();
 
@@ -39,19 +37,19 @@ namespace ScreenSaver
 
 			if (_args[0][1].Equals('S') || _args[0][1].Equals('S'))
 			{
-				Log.WriteInfo("Screen saver mode.");
+				Trace.TraceInformation("Screen saver mode.");
 				Settings.Instance.DisplayMode = DisplayModes.ShowSaver;
 			}
 			else if (_args[0][1].Equals('p') || _args[0][1].Equals('P'))
 			{
-				Log.WriteInfo("Preview mode.");
+				Trace.TraceInformation("Preview mode.");
 				Settings.Instance.DisplayMode = DisplayModes.ShowPreview;
 				var i = int.Parse(_args[1]);
 				Settings.Instance.ParentHandle = new IntPtr(i);
 			}
 			else if (_args[0][1].Equals('c') || _args[0][1].Equals('C'))
 			{
-				Log.WriteInfo("Config mode.");
+				Trace.TraceInformation("Config mode.");
 				Settings.Instance.DisplayMode = DisplayModes.ShowConfig;
 				if (_args.Count > 1)
 				{
@@ -61,7 +59,7 @@ namespace ScreenSaver
 			}
 
 			if (Settings.Instance.ParentHandle != IntPtr.Zero)
-				Log.WriteInfo(string.Format("Parent Handle pass in via arguments is: '{0}'", Settings.Instance.ParentHandle.ToInt32()));
+				Trace.TraceInformation(string.Format("Parent Handle pass in via arguments is: '{0}'", Settings.Instance.ParentHandle.ToInt32()));
 		}
 	}
 }

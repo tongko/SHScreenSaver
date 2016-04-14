@@ -70,14 +70,41 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArgumentsParser.cs" />
+    <Compile Include="ConfigDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConfigDialog.Designer.cs">
+      <DependentUpon>ConfigDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="DisplayModes.cs" />
     <Compile Include="EventLogger.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="FullScreenWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FullScreenWindow.Designer.cs">
+      <DependentUpon>FullScreenWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="PaintPictures.cs" />
+    <Compile Include="PathListDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PathListDialog.Designer.cs">
+      <DependentUpon>PathListDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="PreviewWindow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
+    <EmbeddedResource Include="ConfigDialog.resx">
+      <DependentUpon>ConfigDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FullScreenWindow.resx">
+      <DependentUpon>FullScreenWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PathListDialog.resx">
+      <DependentUpon>PathListDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -105,9 +132,8 @@
     <PostBuildEvent>echo Delete file
 del /F /Q %25windir%25\system32\$(TargetName).scr
 echo copy file
-copy /Y $(TargetFileName) %25windir%25\system32\$(TargetName).scr
-copy /Y $(TargetName).pdb %25windir%25\system32\$(TargetName).pdb
-copy /Y $(TargetFileName) $(TargetName).scr</PostBuildEvent>
+copy /Y $(TargetFileName) $(TargetName).scr
+xcopy "$(TargetName).scr" "%25windir%25\system32\" /Y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

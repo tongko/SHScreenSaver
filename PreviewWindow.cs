@@ -103,6 +103,8 @@ namespace ScreenSaver
 			ShowWindow(_hwnd, SW_SHOW);
 			UpdateWindow(_hwnd);
 
+			PaintTimerTick(_paint, EventArgs.Empty);
+
 			Trace.TraceInformation("PreviewWindow created and visible.");
 
 			MSG msg, msg1;

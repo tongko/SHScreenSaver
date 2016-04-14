@@ -18,7 +18,11 @@ namespace ScreenSaver
 			_paths = new List<string>();
 			var dirs = Settings.Instance.ImagePaths.ToList();
 			foreach (var item in dirs)
+			{
+				Trace.TraceInformation("Search image in path: {0}", item);
+				Trace.Flush();
 				_paths.AddRange(System.IO.Directory.GetFiles(item));
+			}
 			_paths.Shuffle();
 
 			_paintArea = paintArea;
@@ -44,10 +48,23 @@ namespace ScreenSaver
 		{
 			graphics.FillRectangle(Brushes.Black, _paintArea);
 
-			var image = Image.FromFile(_paths[_currentIndex]);
+			Image image = null;
+
+			while (image == null)
+			{
+				try
+				{
+					image = Image.FromFile(_paths[_currentIndex]);
+				}
+				catch (Exception)
+				{
+					_paths.RemoveAt(_currentIndex);
+					if (_paths.Count == 0)
+						throw new InvalidOperationException("Specified folders do not contain valid image files.");
+				}
+			}
+
 			var size = ScaleImage(image, _paintArea.Width, _paintArea.Height);
-			//graphics.PageUnit = GraphicsUnit.Pixel;
-			//graphics.PageScale = 1;
 
 			var cx = (_paintArea.Width - size.Width) / 2;
 			var cy = (_paintArea.Height - size.Height) / 2;
