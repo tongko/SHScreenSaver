@@ -22,7 +22,7 @@ namespace ScreenSaver
 
 		public void Parse(string[] args)
 		{
-			Trace.TraceInformation("Arguments: {0}", string.Join("|", args));
+			Trace.TraceInformation("[{0}]: Arguments: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), string.Join("|", args));
 
 			_args = args.ToList();
 
@@ -32,24 +32,24 @@ namespace ScreenSaver
 				return;
 			}
 
-			if (_args[0].Length < 2)
-				throw new ArgumentException();
-
-			if (_args[0][1].Equals('S') || _args[0][1].Equals('S'))
+			//if (_args[0].Length < 2)
+			//	throw new ArgumentException();
+			Trace.TraceInformation("[{0}]: The _args[0][1] is: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), _args[0][1]);
+			if (_args[0][1].Equals('s') || _args[0][1].Equals('S'))
 			{
-				Trace.TraceInformation("Screen saver mode.");
+				Trace.TraceInformation("[{0}]: Screen saver mode.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 				Settings.Instance.DisplayMode = DisplayModes.ShowSaver;
 			}
 			else if (_args[0][1].Equals('p') || _args[0][1].Equals('P'))
 			{
-				Trace.TraceInformation("Preview mode.");
+				Trace.TraceInformation("[{0}]: Preview mode.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 				Settings.Instance.DisplayMode = DisplayModes.ShowPreview;
 				var i = int.Parse(_args[1]);
 				Settings.Instance.ParentHandle = new IntPtr(i);
 			}
 			else if (_args[0][1].Equals('c') || _args[0][1].Equals('C'))
 			{
-				Trace.TraceInformation("Config mode.");
+				Trace.TraceInformation("[{0}]: Config mode.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 				Settings.Instance.DisplayMode = DisplayModes.ShowConfig;
 				if (_args.Count > 1)
 				{
@@ -59,7 +59,8 @@ namespace ScreenSaver
 			}
 
 			if (Settings.Instance.ParentHandle != IntPtr.Zero)
-				Trace.TraceInformation(string.Format("Parent Handle pass in via arguments is: '{0}'", Settings.Instance.ParentHandle.ToInt32()));
+				Trace.TraceInformation("[{0}]: Parent Handle pass in via arguments is: '{1}'", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Settings.Instance.ParentHandle.ToInt32());
+			Trace.TraceInformation("[{0}]: Parse argument completed.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 		}
 	}
 }

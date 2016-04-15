@@ -19,7 +19,7 @@ namespace ScreenSaver
 			var dirs = Settings.Instance.ImagePaths.ToList();
 			foreach (var item in dirs)
 			{
-				Trace.TraceInformation("Search image in path: {0}", item);
+				Trace.TraceInformation("[{0}]: Search image in path: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), item);
 				Trace.Flush();
 				_paths.AddRange(System.IO.Directory.GetFiles(item));
 			}
@@ -56,7 +56,7 @@ namespace ScreenSaver
 				{
 					image = Image.FromFile(_paths[_currentIndex]);
 				}
-				catch (Exception)
+				catch (OutOfMemoryException)
 				{
 					_paths.RemoveAt(_currentIndex);
 					if (_paths.Count == 0)
@@ -69,8 +69,8 @@ namespace ScreenSaver
 			var cx = (_paintArea.Width - size.Width) / 2;
 			var cy = (_paintArea.Height - size.Height) / 2;
 
-			Trace.TraceInformation("bounds: {4}, cx: {0}, cy: {1}, sz.w: {2}, sz.h: {3} | Image dimension: w: {5} - h: {6}",
-				cx, cy, size.Width, size.Height, _paintArea, image.Width, image.Height);
+			Trace.TraceInformation("[{0}]: bounds: {5}, cx: {1}, cy: {2}, sz.w: {3}, sz.h: {4} | Image dimension: w: {6} - h: {7}",
+				DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), cx, cy, size.Width, size.Height, _paintArea, image.Width, image.Height);
 			graphics.DrawImage(image, new Rectangle(cx, cy, size.Width, size.Height));
 		}
 

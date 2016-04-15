@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
@@ -21,7 +20,7 @@ namespace ScreenSaver
 			InitTrace();
 			if (PreviousInstanceExists())
 			{
-				System.Diagnostics.Trace.TraceInformation("Another instance is running, quit application.");
+				System.Diagnostics.Trace.TraceInformation("[{0}] Another instance is running, quit application.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 				return;
 			}
 
@@ -56,6 +55,7 @@ namespace ScreenSaver
 
 		private void Run()
 		{
+			Trace.TraceInformation("[{0}]: Settings.Instance.DisplayMode is {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Enum.GetName(typeof(DisplayModes), Settings.Instance.DisplayMode));
 			switch (Settings.Instance.DisplayMode)
 			{
 				case DisplayModes.ShowConfig:
@@ -73,24 +73,38 @@ namespace ScreenSaver
 
 		private void RunFullScreen()
 		{
-			var screens = Screen.AllScreens;
-			for (int i = 0; i < screens.Length; i++)
+			try
 			{
-				if (screens[i] == Screen.PrimaryScreen)
-					continue;
+				Trace.TraceInformation("[{0}]: Begin run full screen.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+				if (Settings.Instance.AllMonitors)
+				{
+					var screens = Screen.AllScreens;
+					for (int i = 0; i < screens.Length; i++)
+					{
+						if (screens[i] == Screen.PrimaryScreen)
+							continue;
 
-				var thread = new Thread(new ParameterizedThreadStart(StartFullScreen));
-				thread.TrySetApartmentState(ApartmentState.STA);
-				thread.Start(i);
+						var thread = new Thread(new ParameterizedThreadStart(StartFullScreen));
+						thread.TrySetApartmentState(ApartmentState.STA);
+						thread.Start(i);
+					}
+				}
+
+				Application.Run(new FullScreenWindow(0, Cursor.Position));
 			}
-
-			Application.Run(new FullScreenWindow(0, Cursor.Position));
+			catch (Exception e)
+			{
+				Trace.TraceError("[{0}]: Error occurs while running screensaver. Exception: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), e);
+				throw;
+			}
 		}
 
 		private void StartFullScreen(object parameter)
 		{
+			var r = new Random();
+
 			int monIndex = (int)parameter;
-			Application.Run(new FullScreenWindow(monIndex, Cursor.Position));
+			Application.Run(new FullScreenWindow(monIndex, Cursor.Position, r.Next(250, 500)));
 		}
 
 		private void RunPreview()

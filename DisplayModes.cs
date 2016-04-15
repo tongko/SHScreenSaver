@@ -2,7 +2,6 @@
 {
 	enum DisplayModes
 	{
-		None,
 		ShowConfig,
 		ShowPreview,
 		ShowSaver

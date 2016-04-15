@@ -62,7 +62,7 @@ namespace ScreenSaver
 
 		public void Run()
 		{
-			Trace.TraceInformation("Run PreviewWindow.");
+			Trace.TraceInformation("[{0}]: Run PreviewWindow.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 
 			var wc = new WNDCLASSEX();
 			wc.cbSize = Marshal.SizeOf(typeof(WNDCLASSEX));
@@ -87,7 +87,7 @@ namespace ScreenSaver
 			RECT rc = new RECT(0, 0, 100, 100);
 			GetClientRect(_parent, out rc);
 
-			Trace.TraceInformation("Paint Area: {0}, {1}, {2}, {3}", rc.left, rc.top, rc.right, rc.bottom);
+			Trace.TraceInformation("[{0}]: Paint Area: {1}, {2}, {3}, {4}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), rc.left, rc.top, rc.right, rc.bottom);
 			_paint = new PaintPictures(System.Drawing.Rectangle.FromLTRB(rc.left, rc.top, rc.right, rc.bottom));
 			_paint.TimerTick += PaintTimerTick;
 			_paint.TickTimer.Start();
@@ -96,7 +96,7 @@ namespace ScreenSaver
 				IntPtr.Zero, _hInstance, IntPtr.Zero);
 			if (_hwnd == IntPtr.Zero)
 			{
-				Trace.TraceError("CreateWindowEx failed with last win32 error: {0}.", Marshal.GetLastWin32Error());
+				Trace.TraceError("[{0}]: CreateWindowEx failed with last win32 error: {1}.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Marshal.GetLastWin32Error());
 				return;
 			}
 
@@ -105,7 +105,7 @@ namespace ScreenSaver
 
 			PaintTimerTick(_paint, EventArgs.Empty);
 
-			Trace.TraceInformation("PreviewWindow created and visible.");
+			Trace.TraceInformation("[{0}]: PreviewWindow created and visible.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 
 			MSG msg, msg1;
 			while (true)
@@ -115,7 +115,7 @@ namespace ScreenSaver
 					var result = GetMessage(out msg1, IntPtr.Zero, 0, 0);
 					if (result <= 0)
 					{
-						Trace.TraceError("GetMessage failed with result '{0}', with message id: {1}", result, msg1.message);
+						Trace.TraceError("[{0}]: GetMessage failed with result '{1}', with message id: {2}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), result, msg1.message);
 						break;
 					}
 
@@ -123,7 +123,7 @@ namespace ScreenSaver
 				}
 			}
 
-			Trace.TraceInformation("Exiting message pump.");
+			Trace.TraceInformation("[{0}]: Exiting message pump.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 		}
 
 		private void PaintTimerTick(object sender, EventArgs e)
