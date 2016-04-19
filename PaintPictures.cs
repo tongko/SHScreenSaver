@@ -28,15 +28,16 @@ namespace ScreenSaver
 			_paintArea = paintArea;
 			TickTimer = new Timer { Interval = Settings.Instance.Interval * 1000 };
 			TickTimer.Tick += OnTimerTick;
+
+			_currentIndex = 0;
 		}
 
 		public event EventHandler TimerTick;
 
 		private void OnTimerTick(object sender, EventArgs e)
 		{
-			if (_currentIndex >= _paths.Count)
+			if (++_currentIndex >= _paths.Count)
 				_currentIndex = 0;
-			_currentIndex++;
 
 			if (TimerTick != null)
 				TimerTick(this, EventArgs.Empty);
@@ -59,6 +60,8 @@ namespace ScreenSaver
 				catch (OutOfMemoryException)
 				{
 					_paths.RemoveAt(_currentIndex);
+					if (_currentIndex >= _paths.Count)
+						_currentIndex = 0;
 					if (_paths.Count == 0)
 						throw new InvalidOperationException("Specified folders do not contain valid image files.");
 				}
@@ -69,8 +72,10 @@ namespace ScreenSaver
 			var cx = (_paintArea.Width - size.Width) / 2;
 			var cy = (_paintArea.Height - size.Height) / 2;
 
+#if DEBUG
 			Trace.TraceInformation("[{0}]: bounds: {5}, cx: {1}, cy: {2}, sz.w: {3}, sz.h: {4} | Image dimension: w: {6} - h: {7}",
 				DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), cx, cy, size.Width, size.Height, _paintArea, image.Width, image.Height);
+#endif
 			graphics.DrawImage(image, new Rectangle(cx, cy, size.Width, size.Height));
 		}
 

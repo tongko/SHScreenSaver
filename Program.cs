@@ -59,6 +59,7 @@ namespace ScreenSaver
 			switch (Settings.Instance.DisplayMode)
 			{
 				case DisplayModes.ShowConfig:
+					RunShowConfig();
 					break;
 				case DisplayModes.ShowPreview:
 					RunPreview();
@@ -68,6 +69,30 @@ namespace ScreenSaver
 					break;
 				default:
 					break;
+			}
+		}
+
+		private void RunShowConfig()
+		{
+			try
+			{
+				Trace.TraceInformation("[{0}]: Begin config settings.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+
+				var config = new ConfigDialog();
+				var settings = Settings.Instance;
+				if (settings.ParentHandle != IntPtr.Zero)
+				{
+					var parent = new NativeWindow();
+					parent.AssignHandle(settings.ParentHandle);
+					config.ShowDialog(parent);
+				}
+				else
+					config.ShowDialog();
+			}
+			catch (Exception e)
+			{
+				Trace.TraceError("[{0}]: Error occurs while running screensaver settings. Exception: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), e);
+				throw;
 			}
 		}
 

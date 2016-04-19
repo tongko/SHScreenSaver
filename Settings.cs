@@ -8,6 +8,8 @@ namespace ScreenSaver
 {
 	class Settings
 	{
+		const char PathSeparator = ';';
+
 		private readonly string[] KeyPaths = { "SinHing", "ScreenSaver"};
 		private const string ImagePathsKeyName = "ImagePaths";
 		private const string IntervalKeyName = "Interval";
@@ -80,7 +82,18 @@ namespace ScreenSaver
 			AllMonitors = value;
 		}
 
-		private void RetrieveSettings()
+		public void SaveSettings()
+		{
+			var key = EnsureKeyExists();
+
+			key.SetValue(ImagePathsKeyName, string.Join(PathSeparator.ToString(), _paths));
+			key.SetValue(IntervalKeyName, Interval);
+			key.SetValue(AllMonitorsKeyName, AllMonitors);
+
+			key.Flush();
+		}
+
+		private Microsoft.Win32.RegistryKey EnsureKeyExists()
 		{
 			var parentKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("Software", true);
 			for (int i = 0; i < KeyPaths.Length; i++)
@@ -91,8 +104,16 @@ namespace ScreenSaver
 				parentKey = key;
 			}
 
+			return parentKey;
+		}
+
+		private void RetrieveSettings()
+		{
+			var parentKey = EnsureKeyExists();
+
 			var paths = (string)parentKey.GetValue(ImagePathsKeyName, Environment.ExpandEnvironmentVariables("%UserProfile%\\Pictures\\"));
-			_paths = paths.Split(new[] { ',' }).ToList();
+			_paths = paths.Split(new[] { PathSeparator }).ToList();
+
 			Interval = (int)parentKey.GetValue(IntervalKeyName, 5);
 
 			AllMonitors = Convert.ToBoolean(parentKey.GetValue(AllMonitorsKeyName, 1));

@@ -25,6 +25,8 @@ namespace ScreenSaver
 		const int WS_SYSMENU = 0x80000;
 		const int WS_OVERLAPPEDWINDOW = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_SIZEFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
 
+		const int WS_EX_TOPMOST = 0x00000008;
+
 		const int GWLP_USERDATA = -21;
 
 		const int WM_NCCREATE = 0x0081;
@@ -33,6 +35,7 @@ namespace ScreenSaver
 		const int WM_ACTIVATEAPP = 0x001C;
 		const int WM_ACTIVATE = 0x0006;
 		const int WM_CLOSE = 0x0010;
+		const int WM_PAINT = 0x000F;
 
 		const int IDC_ARROW = 32512;
 
@@ -46,6 +49,8 @@ namespace ScreenSaver
 		private bool disposedValue = false; // To detect redundant calls
 
 		private PaintPictures _paint;
+
+		private bool _flag = false;
 
 		#region ctor
 
@@ -90,9 +95,8 @@ namespace ScreenSaver
 			Trace.TraceInformation("[{0}]: Paint Area: {1}, {2}, {3}, {4}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), rc.left, rc.top, rc.right, rc.bottom);
 			_paint = new PaintPictures(System.Drawing.Rectangle.FromLTRB(rc.left, rc.top, rc.right, rc.bottom));
 			_paint.TimerTick += PaintTimerTick;
-			_paint.TickTimer.Start();
 
-			_hwnd = CreateWindowEx(0, WndClassName, null, WS_CHILD, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, _parent,
+			_hwnd = CreateWindowEx(WS_EX_TOPMOST, WndClassName, null, WS_CHILD, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, _parent,
 				IntPtr.Zero, _hInstance, IntPtr.Zero);
 			if (_hwnd == IntPtr.Zero)
 			{
@@ -103,7 +107,9 @@ namespace ScreenSaver
 			ShowWindow(_hwnd, SW_SHOW);
 			UpdateWindow(_hwnd);
 
-			PaintTimerTick(_paint, EventArgs.Empty);
+			//PaintTimerTick(_paint, EventArgs.Empty);
+
+			_paint.TickTimer.Start();
 
 			Trace.TraceInformation("[{0}]: PreviewWindow created and visible.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 
@@ -114,12 +120,17 @@ namespace ScreenSaver
 				{
 					var result = GetMessage(out msg1, IntPtr.Zero, 0, 0);
 					if (result <= 0)
-					{
-						Trace.TraceError("[{0}]: GetMessage failed with result '{1}', with message id: {2}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), result, msg1.message);
 						break;
-					}
 
 					DispatchMessage(ref msg);
+				}
+				else
+				{
+					if (!_flag)
+					{
+						Trace.TraceInformation("[{0}]: Special Paint event", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+						PaintTimerTick(_paint, EventArgs.Empty);
+					}
 				}
 			}
 
@@ -128,6 +139,7 @@ namespace ScreenSaver
 
 		private void PaintTimerTick(object sender, EventArgs e)
 		{
+			Trace.TraceInformation("[{0}]: Paint event", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
 			IntPtr hdc = GetDC(_hwnd);
 			var g = System.Drawing.Graphics.FromHdc(hdc);
 
@@ -138,12 +150,25 @@ namespace ScreenSaver
 			ReleaseDC(_hwnd, hdc);
 
 			UpdateWindow(_hwnd);
+
+			_flag = true;
 		}
 
 		protected LRESULT WndProc(HWND hwnd, int msg, UIntPtr wParam, IntPtr lParam)
 		{
 			switch (msg)
 			{
+				case WM_PAINT:
+					if (_paint == null)
+						break;
+
+					PAINTSTRUCT ps;
+					var hdc = BeginPaint(hwnd, out ps);
+					var g = System.Drawing.Graphics.FromHdc(hdc);
+					_paint.Paint(g);
+					g.Dispose();
+					EndPaint(hwnd, ref ps);
+					break;
 				case WM_ACTIVATE:
 					if (LOWORD(wParam) == 0)
 						PostMessage(_hwnd, WM_CLOSE, UIntPtr.Zero, IntPtr.Zero);
@@ -212,6 +237,18 @@ namespace ScreenSaver
 		#region PInvoke
 
 		delegate LRESULT WndProcHandler(HWND hwnd, int msg, UIntPtr wParam, IntPtr lParam);
+
+		[StructLayout(LayoutKind.Sequential)]
+		struct PAINTSTRUCT
+		{
+			public IntPtr hdc;
+			public bool fErase;
+			public RECT rcPaint;
+			public bool fRestore;
+			public bool fIncUpdate;
+			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+			public byte[] rgbReserved;
+		}
 
 		[StructLayout(LayoutKind.Sequential)]
 		struct RECT
@@ -359,6 +396,12 @@ namespace ScreenSaver
 
 		[DllImport("user32.dll", EntryPoint = "PostMessageW", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
 		static extern bool PostMessage([In, Optional] HWND hwnd, [In] int msg, [In] UIntPtr wParam, [In] IntPtr lParam);
+
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		static extern IntPtr BeginPaint([In] HWND hwnd, [Out] out PAINTSTRUCT lpPaint);
+
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		static extern bool EndPaint(HWND hWnd, [In] ref PAINTSTRUCT lpPaint);
 
 		#endregion
 	}

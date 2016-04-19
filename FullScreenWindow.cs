@@ -65,7 +65,10 @@ namespace ScreenSaver
 			base.OnMouseMove(e);
 
 			var loc = PointToScreen(e.Location);
+
+#if DEBUG
 			System.Diagnostics.Trace.TraceInformation("[{0}]: Mouse move location: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), loc);
+#endif
 
 			var deltaX = loc.X - _mouseLocation.X;
 			var deltaY = loc.Y - _mouseLocation.Y;

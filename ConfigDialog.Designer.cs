@@ -44,47 +44,55 @@
 			// 
 			// label1
 			// 
-			this.label1.Location = new System.Drawing.Point(29, 9);
+			this.label1.Location = new System.Drawing.Point(39, 14);
+			this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(178, 23);
+			this.label1.Size = new System.Drawing.Size(237, 35);
 			this.label1.TabIndex = 0;
 			this.label1.Text = "Use pictures from these folders:";
 			// 
 			// btnEdit
 			// 
-			this.btnEdit.Location = new System.Drawing.Point(434, 9);
+			this.btnEdit.Location = new System.Drawing.Point(579, 14);
+			this.btnEdit.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.btnEdit.Name = "btnEdit";
-			this.btnEdit.Size = new System.Drawing.Size(90, 23);
+			this.btnEdit.Size = new System.Drawing.Size(120, 35);
 			this.btnEdit.TabIndex = 1;
 			this.btnEdit.Text = "&Edit paths...";
 			this.btnEdit.UseVisualStyleBackColor = true;
+			this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
 			// 
 			// lblPaths
 			// 
-			this.lblPaths.Location = new System.Drawing.Point(29, 42);
+			this.lblPaths.AutoEllipsis = true;
+			this.lblPaths.Location = new System.Drawing.Point(39, 65);
+			this.lblPaths.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.lblPaths.Name = "lblPaths";
-			this.lblPaths.Size = new System.Drawing.Size(514, 100);
+			this.lblPaths.Size = new System.Drawing.Size(685, 154);
 			this.lblPaths.TabIndex = 2;
 			// 
 			// label3
 			// 
 			this.label3.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.label3.Location = new System.Drawing.Point(12, 152);
+			this.label3.Location = new System.Drawing.Point(16, 234);
+			this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(550, 2);
+			this.label3.Size = new System.Drawing.Size(733, 3);
 			this.label3.TabIndex = 3;
 			// 
 			// label4
 			// 
-			this.label4.Location = new System.Drawing.Point(29, 169);
+			this.label4.Location = new System.Drawing.Point(39, 260);
+			this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(100, 23);
+			this.label4.Size = new System.Drawing.Size(133, 35);
 			this.label4.TabIndex = 4;
 			this.label4.Text = "Slide show &interval:";
 			// 
 			// nudInterval
 			// 
-			this.nudInterval.Location = new System.Drawing.Point(236, 167);
+			this.nudInterval.Location = new System.Drawing.Point(315, 257);
+			this.nudInterval.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.nudInterval.Maximum = new decimal(new int[] {
             30,
             0,
@@ -96,7 +104,7 @@
             0,
             0});
 			this.nudInterval.Name = "nudInterval";
-			this.nudInterval.Size = new System.Drawing.Size(47, 20);
+			this.nudInterval.Size = new System.Drawing.Size(63, 27);
 			this.nudInterval.TabIndex = 5;
 			this.nudInterval.Value = new decimal(new int[] {
             1,
@@ -107,18 +115,20 @@
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(299, 169);
+			this.label5.Location = new System.Drawing.Point(399, 260);
+			this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(47, 13);
+			this.label5.Size = new System.Drawing.Size(62, 20);
 			this.label5.TabIndex = 6;
 			this.label5.Text = "seconds";
 			// 
 			// chkAllMons
 			// 
 			this.chkAllMons.AutoSize = true;
-			this.chkAllMons.Location = new System.Drawing.Point(236, 194);
+			this.chkAllMons.Location = new System.Drawing.Point(315, 299);
+			this.chkAllMons.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.chkAllMons.Name = "chkAllMons";
-			this.chkAllMons.Size = new System.Drawing.Size(119, 17);
+			this.chkAllMons.Size = new System.Drawing.Size(166, 24);
 			this.chkAllMons.TabIndex = 7;
 			this.chkAllMons.Text = "Show in all &monitors";
 			this.chkAllMons.UseVisualStyleBackColor = true;
@@ -126,34 +136,42 @@
 			// label6
 			// 
 			this.label6.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.label6.Location = new System.Drawing.Point(0, 237);
+			this.label6.Location = new System.Drawing.Point(0, 365);
+			this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(580, 2);
+			this.label6.Size = new System.Drawing.Size(773, 3);
 			this.label6.TabIndex = 8;
 			// 
 			// btnSave
 			// 
-			this.btnSave.Location = new System.Drawing.Point(387, 258);
+			this.btnSave.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.btnSave.Location = new System.Drawing.Point(516, 397);
+			this.btnSave.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.btnSave.Name = "btnSave";
-			this.btnSave.Size = new System.Drawing.Size(75, 23);
+			this.btnSave.Size = new System.Drawing.Size(100, 35);
 			this.btnSave.TabIndex = 9;
 			this.btnSave.Text = "&Save";
 			this.btnSave.UseVisualStyleBackColor = true;
+			this.btnSave.Click += new System.EventHandler(this.SaveClicked);
 			// 
 			// btnCancel
 			// 
-			this.btnCancel.Location = new System.Drawing.Point(468, 258);
+			this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.btnCancel.Location = new System.Drawing.Point(624, 397);
+			this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.btnCancel.Name = "btnCancel";
-			this.btnCancel.Size = new System.Drawing.Size(75, 23);
+			this.btnCancel.Size = new System.Drawing.Size(100, 35);
 			this.btnCancel.TabIndex = 10;
 			this.btnCancel.Text = "Cancel";
 			this.btnCancel.UseVisualStyleBackColor = true;
 			// 
 			// ConfigDialog
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AcceptButton = this.btnSave;
+			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(572, 293);
+			this.CancelButton = this.btnCancel;
+			this.ClientSize = new System.Drawing.Size(763, 451);
 			this.Controls.Add(this.btnCancel);
 			this.Controls.Add(this.btnSave);
 			this.Controls.Add(this.label6);
@@ -165,7 +183,9 @@
 			this.Controls.Add(this.lblPaths);
 			this.Controls.Add(this.btnEdit);
 			this.Controls.Add(this.label1);
+			this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "ConfigDialog";
