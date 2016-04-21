@@ -38,7 +38,9 @@ namespace ScreenSaver
 			_painter.TickTimer.Interval += delay;
 
 			_mouseLocation = mouseLocation;
+#if DEBUG
 			System.Diagnostics.Trace.TraceInformation("[{0}] Starting mouse position: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), _mouseLocation);
+#endif
 			Cursor.Hide();
 		}
 
@@ -62,7 +64,7 @@ namespace ScreenSaver
 
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
-			base.OnMouseMove(e);
+//			base.OnMouseMove(e);
 
 			var loc = PointToScreen(e.Location);
 
@@ -81,14 +83,14 @@ namespace ScreenSaver
 
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
-			base.OnMouseUp(e);
+//			base.OnMouseUp(e);
 
 			Application.Exit();
 		}
 
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
-			base.OnMouseWheel(e);
+//			base.OnMouseWheel(e);
 
 			Application.Exit();
 		}
