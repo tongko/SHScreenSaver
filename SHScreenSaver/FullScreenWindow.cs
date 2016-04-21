@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -6,6 +7,8 @@ namespace ScreenSaver
 {
 	public partial class FullScreenWindow : Form
 	{
+		static bool _formClosing = false;
+
 		Screen _screen;
 		PaintPictures _painter;
 		Point _mouseLocation;
@@ -44,9 +47,23 @@ namespace ScreenSaver
 			Cursor.Hide();
 		}
 
+		protected override void OnClosing(CancelEventArgs e)
+		{
+			base.OnClosing(e);
+
+			_formClosing = true;
+			e.Cancel = false;
+		}
+
 		protected override void OnLoad(EventArgs e)
 		{
 			base.OnLoad(e);
+
+			BringToFront();
+			Focus();
+			KeyPreview = true;
+			ShowInTaskbar = false;
+
 			_painter.TickTimer.Start();
 		}
 
@@ -64,7 +81,10 @@ namespace ScreenSaver
 
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
-//			base.OnMouseMove(e);
+			//			base.OnMouseMove(e);
+
+			if (_formClosing)
+				return;
 
 			var loc = PointToScreen(e.Location);
 
@@ -83,24 +103,32 @@ namespace ScreenSaver
 
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
-//			base.OnMouseUp(e);
-
-			Application.Exit();
+			//			base.OnMouseUp(e);
+			if (!_formClosing)
+				Application.Exit();
 		}
 
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
-//			base.OnMouseWheel(e);
+			//			base.OnMouseWheel(e);
+			if (!_formClosing)
+				Application.Exit();
+		}
 
+		protected override void OnKeyDown(KeyEventArgs e)
+		{
+#if DEBUG
+			System.Diagnostics.Trace.TraceInformation("[{0}]: KeyDown: Keys.{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Enum.GetName(typeof(Keys), e.KeyData));
+#endif
 			Application.Exit();
 		}
 
-		protected override bool ProcessKeyPreview(ref Message m)
+		protected override bool IsInputKey(Keys keyData)
 		{
-			Application.Exit();
-
-			//	This will never fire.
-			return false;
+#if DEBUG
+			System.Diagnostics.Trace.TraceInformation("[{0}]: keyData: Keys.{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Enum.GetName(typeof(Keys), keyData));
+#endif
+			return true;
 		}
 	}
 }
