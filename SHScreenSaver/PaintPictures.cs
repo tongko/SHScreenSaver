@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using ScreenSaver.ImageTransitions;
 
 namespace ScreenSaver
 {
@@ -12,6 +13,9 @@ namespace ScreenSaver
 		List<string> _paths;
 		int _currentIndex;
 		Rectangle _paintArea;
+		ImageTransition _transition;
+		Image _currentImage;
+		Image _prevImage;
 
 		public PaintPictures(Rectangle paintArea)
 		{
@@ -30,17 +34,46 @@ namespace ScreenSaver
 			TickTimer.Tick += OnTimerTick;
 
 			_currentIndex = 0;
+			_transition = new ImageTransition(paintArea, TransitionEffects.All, true);
 		}
 
 		public event EventHandler TimerTick;
 
 		private void OnTimerTick(object sender, EventArgs e)
 		{
-			if (++_currentIndex >= _paths.Count)
-				_currentIndex = 0;
+			_prevImage = _currentImage;
+			_currentImage = GetNextImage();
+
+			var effect = _transition.CreateTransition(_prevImage, _currentImage);
 
 			if (TimerTick != null)
 				TimerTick(this, EventArgs.Empty);
+		}
+
+		private Image GetNextImage()
+		{
+			Image image = null;
+
+			while (image == null)
+			{
+				try
+				{
+					image = Image.FromFile(_paths[_currentIndex]);
+				}
+				catch (OutOfMemoryException)
+				{
+					_paths.RemoveAt(_currentIndex);
+					if (_currentIndex == _paths.Count)
+						_currentIndex = 0;
+					if (_paths.Count == 0)
+						throw new InvalidOperationException("Specified folders do not contain valid image files.");
+				}
+			}
+
+			_currentIndex++;
+			if (_currentIndex == _paths.Count)
+				_currentIndex = 0;
+			return image;
 		}
 
 		public Timer TickTimer { get; private set; }

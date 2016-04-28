@@ -106,16 +106,18 @@ namespace ScreenSaver
 					var screens = Screen.AllScreens;
 					for (int i = 0; i < screens.Length; i++)
 					{
-						if (screens[i] == Screen.PrimaryScreen)
-							continue;
+						//if (screens[i] == Screen.PrimaryScreen)
+						//	continue;
 
-						var thread = new Thread(new ParameterizedThreadStart(StartFullScreen));
-						thread.TrySetApartmentState(ApartmentState.STA);
-						thread.Start(i);
+						//var thread = new Thread(new ParameterizedThreadStart(StartFullScreen));
+						//thread.TrySetApartmentState(ApartmentState.STA);
+						//thread.Start(i);
+						new FullScreenWindow(i, Cursor.Position).Show();
 					}
 				}
 
-				Application.Run(new FullScreenWindow(0, Cursor.Position));
+				//Application.Run(new FullScreenWindow(0, Cursor.Position));
+				Application.Run();
 			}
 			catch (Exception e)
 			{

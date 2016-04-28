@@ -86,6 +86,13 @@
     <Compile Include="FullScreenWindow.Designer.cs">
       <DependentUpon>FullScreenWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="ImageTransitions\ImageTransition.cs" />
+    <Compile Include="ImageTransitions\TransitionDissolve.cs" />
+    <Compile Include="ImageTransitions\TransitionEffect.cs" />
+    <Compile Include="ImageTransitions\TransitionFade.cs" />
+    <Compile Include="ImageTransitions\TransitionInfo.cs" />
+    <Compile Include="ImageTransitions\TransitionNone.cs" />
+    <Compile Include="ImageTransitions\TransitionSlide.cs" />
     <Compile Include="PaintPictures.cs" />
     <Compile Include="PathListDialog.cs">
       <SubType>Form</SubType>
@@ -128,6 +135,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>echo Delete file
