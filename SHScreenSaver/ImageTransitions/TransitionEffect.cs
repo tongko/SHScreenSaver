@@ -30,11 +30,11 @@ namespace ScreenSaver.ImageTransitions
 			((Bitmap)Canvas).SetResolution(BackImage.HorizontalResolution, BackImage.VerticalResolution);
 		}
 
-		public EventHandler TransitionStart;
+		public event EventHandler TransitionStart;
 
-		public EventHandler TransitionStep;
+		public event EventHandler TransitionStep;
 
-		public EventHandler TransitionStop;
+		public event EventHandler TransitionStop;
 
 		protected Image FrontImage { get; set; }
 

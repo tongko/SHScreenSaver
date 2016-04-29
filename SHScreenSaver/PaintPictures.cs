@@ -37,7 +37,9 @@ namespace ScreenSaver
 			_transition = new ImageTransition(paintArea, TransitionEffects.All, true);
 		}
 
-		public event EventHandler TimerTick;
+		public event EventHandler<PaintPictureEventArgs> TimerTick;
+
+		public Rectangle Bounds { get { return _paintArea; } }
 
 		private void OnTimerTick(object sender, EventArgs e)
 		{
@@ -46,8 +48,18 @@ namespace ScreenSaver
 
 			var effect = _transition.CreateTransition(_prevImage, _currentImage);
 
-			if (TimerTick != null)
-				TimerTick(this, EventArgs.Empty);
+			if (TimerTick == null) return;
+
+			var args = new PaintPictureEventArgs { Effect = effect };
+			foreach (var d in TimerTick.GetInvocationList())
+			{
+				var s = d.Target as System.ComponentModel.ISynchronizeInvoke;
+				if (s != null && s.InvokeRequired)
+					s.BeginInvoke(d, new object[] { this, args });
+				else
+					d.DynamicInvoke(this, args);
+
+			}
 		}
 
 		private Image GetNextImage()
@@ -78,39 +90,39 @@ namespace ScreenSaver
 
 		public Timer TickTimer { get; private set; }
 
-		public void Paint(Graphics graphics)
-		{
-			graphics.FillRectangle(Brushes.Black, _paintArea);
+		//		public void Paint(Graphics graphics)
+		//		{
+		//			graphics.FillRectangle(Brushes.Black, _paintArea);
 
-			Image image = null;
+		//			Image image = null;
 
-			while (image == null)
-			{
-				try
-				{
-					image = Image.FromFile(_paths[_currentIndex]);
-				}
-				catch (OutOfMemoryException)
-				{
-					_paths.RemoveAt(_currentIndex);
-					if (_currentIndex >= _paths.Count)
-						_currentIndex = 0;
-					if (_paths.Count == 0)
-						throw new InvalidOperationException("Specified folders do not contain valid image files.");
-				}
-			}
+		//			while (image == null)
+		//			{
+		//				try
+		//				{
+		//					image = Image.FromFile(_paths[_currentIndex]);
+		//				}
+		//				catch (OutOfMemoryException)
+		//				{
+		//					_paths.RemoveAt(_currentIndex);
+		//					if (_currentIndex >= _paths.Count)
+		//						_currentIndex = 0;
+		//					if (_paths.Count == 0)
+		//						throw new InvalidOperationException("Specified folders do not contain valid image files.");
+		//				}
+		//			}
 
-			var size = ScaleImage(image, _paintArea.Width, _paintArea.Height);
+		//			var size = ScaleImage(image, _paintArea.Width, _paintArea.Height);
 
-			var cx = (_paintArea.Width - size.Width) / 2;
-			var cy = (_paintArea.Height - size.Height) / 2;
+		//			var cx = (_paintArea.Width - size.Width) / 2;
+		//			var cy = (_paintArea.Height - size.Height) / 2;
 
-#if DEBUG
-			Trace.TraceInformation("[{0}]: bounds: {5}, cx: {1}, cy: {2}, sz.w: {3}, sz.h: {4} | Image dimension: w: {6} - h: {7}",
-				DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), cx, cy, size.Width, size.Height, _paintArea, image.Width, image.Height);
-#endif
-			graphics.DrawImage(image, new Rectangle(cx, cy, size.Width, size.Height));
-		}
+		//#if DEBUG
+		//			Trace.TraceInformation("[{0}]: bounds: {5}, cx: {1}, cy: {2}, sz.w: {3}, sz.h: {4} | Image dimension: w: {6} - h: {7}",
+		//				DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), cx, cy, size.Width, size.Height, _paintArea, image.Width, image.Height);
+		//#endif
+		//			graphics.DrawImage(image, new Rectangle(cx, cy, size.Width, size.Height));
+		//		}
 
 		private Size ScaleImage(Image image, int maxW, int maxH)
 		{

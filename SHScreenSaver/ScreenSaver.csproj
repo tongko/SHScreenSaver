@@ -93,6 +93,7 @@
     <Compile Include="ImageTransitions\TransitionInfo.cs" />
     <Compile Include="ImageTransitions\TransitionNone.cs" />
     <Compile Include="ImageTransitions\TransitionSlide.cs" />
+    <Compile Include="PaintPictureEventArgs.cs" />
     <Compile Include="PaintPictures.cs" />
     <Compile Include="PathListDialog.cs">
       <SubType>Form</SubType>
