@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 using HINSTANCE = System.IntPtr;
 using HMENU = System.IntPtr;
 using HWND = System.IntPtr;
@@ -47,10 +48,10 @@ namespace ScreenSaver
 		private HWND _hwnd;
 		private bool disposedValue = false; // To detect redundant calls
 
-		private PaintPictures _paint;
-
 		private bool _flag = false;
 		private System.Drawing.Rectangle _bounds;
+
+		private ImageTransitions.ImageTransition _transition;
 
 		#region ctor
 
@@ -93,9 +94,12 @@ namespace ScreenSaver
 			GetClientRect(_parent, out rc);
 
 			Trace.TraceInformation("[{0}]: Paint Area: {1}, {2}, {3}, {4}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), rc.left, rc.top, rc.right, rc.bottom);
-			_paint = new PaintPictures(System.Drawing.Rectangle.FromLTRB(rc.left, rc.top, rc.right, rc.bottom));
-			_paint.TimerTick += PaintTimerTick;
-			_bounds = _paint.Bounds;
+			var bounds = System.Drawing.Rectangle.FromLTRB(rc.left, rc.top, rc.right, rc.bottom);
+			_transition = new ImageTransitions.ImageTransition(this,
+				bounds, Settings.Instance.Interval, Settings.Instance.TransitionEffect, Settings.Instance.RandomizeEffects,
+				Settings.Instance.ImagePaths, true);
+
+			_bounds = bounds;
 
 			_hwnd = CreateWindowEx(WS_EX_TOPMOST, WndClassName, null, WS_CHILD, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, _parent,
 				IntPtr.Zero, _hInstance, IntPtr.Zero);
@@ -105,12 +109,9 @@ namespace ScreenSaver
 				return;
 			}
 
+			_transition.Start();
 			ShowWindow(_hwnd, SW_SHOW);
 			UpdateWindow(_hwnd);
-
-			//PaintTimerTick(_paint, EventArgs.Empty);
-
-			_paint.TickTimer.Start();
 
 			Trace.TraceInformation("[{0}]: PreviewWindow created and visible.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 
@@ -130,7 +131,8 @@ namespace ScreenSaver
 					if (!_flag)
 					{
 						Trace.TraceInformation("[{0}]: Special Paint event", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
-						PaintTimerTick(_paint, PaintPictureEventArgs.Empty);
+						Invalidate(_bounds);
+						_flag = true;
 					}
 				}
 			}
@@ -138,32 +140,9 @@ namespace ScreenSaver
 			Trace.TraceInformation("[{0}]: Exiting message pump.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 		}
 
-		private void PaintTimerTick(object sender, PaintPictureEventArgs e)
+		public void Invalidate(System.Drawing.Rectangle rectangle)
 		{
-			Trace.TraceInformation("[{0}]: Paint event", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
-			var effect = e.Effect;
-			effect.TransitionStart += Effect_TransitionStart;
-			effect.TransitionStep += Effect_TransitionStep;
-			effect.TransitionStop += Effect_TransitionStop;
-
-			effect.Start();
-
-			_flag = true;
-		}
-
-		private void Effect_TransitionStop(object sender, EventArgs e)
-		{
-			throw new NotImplementedException();
-		}
-
-		private void Effect_TransitionStep(object sender, EventArgs e)
-		{
-			throw new NotImplementedException();
-		}
-
-		private void Effect_TransitionStart(object sender, EventArgs e)
-		{
-			var rc = RECT.FromRectangle(_bounds);
+			var rc = RECT.FromRectangle(rectangle);
 			InvalidateRect(_hwnd, ref rc, false);
 		}
 
@@ -172,13 +151,17 @@ namespace ScreenSaver
 			switch (msg)
 			{
 				case WM_PAINT:
-					if (_paint == null)
+					if (_transition == null)
 						break;
 
 					PAINTSTRUCT ps;
 					var hdc = BeginPaint(hwnd, out ps);
 					using (var g = System.Drawing.Graphics.FromHdc(hdc))
 					{
+						var clipRc = System.Drawing.Rectangle.FromLTRB(
+							ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom);
+						var pe = new PaintEventArgs(g, clipRc);
+						_transition.PaintTransition(pe);
 					}
 					EndPaint(hwnd, ref ps);
 					break;

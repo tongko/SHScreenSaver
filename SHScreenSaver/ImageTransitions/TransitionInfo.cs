@@ -13,5 +13,7 @@
 		public int StepTime { get; set; }
 
 		public int TransitionTime { get; set; }
+
+		public bool RandomizeEffect { get; set; }
 	}
 }

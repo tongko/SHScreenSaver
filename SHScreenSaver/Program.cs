@@ -68,7 +68,23 @@ namespace ScreenSaver
 					RunFullScreen();
 					break;
 				default:
+					RunDebugScreen();
 					break;
+			}
+		}
+
+		private void RunDebugScreen()
+		{
+			try
+			{
+				var b = new System.Drawing.Rectangle(50, 50, 640, 360);
+				new FullScreenWindow(b, Cursor.Position).Show();
+				Application.Run();
+			}
+			catch (Exception e)
+			{
+				Trace.TraceError("[{0}]: Error occurs while running screensaver. Exception: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), e);
+				throw;
 			}
 		}
 
@@ -106,17 +122,11 @@ namespace ScreenSaver
 					var screens = Screen.AllScreens;
 					for (int i = 0; i < screens.Length; i++)
 					{
-						//if (screens[i] == Screen.PrimaryScreen)
-						//	continue;
-
-						//var thread = new Thread(new ParameterizedThreadStart(StartFullScreen));
-						//thread.TrySetApartmentState(ApartmentState.STA);
-						//thread.Start(i);
-						new FullScreenWindow(i, Cursor.Position).Show();
+						var b = screens[i].Bounds;
+						new FullScreenWindow(b, Cursor.Position).Show();
 					}
 				}
 
-				//Application.Run(new FullScreenWindow(0, Cursor.Position));
 				Application.Run();
 			}
 			catch (Exception e)
@@ -124,14 +134,6 @@ namespace ScreenSaver
 				Trace.TraceError("[{0}]: Error occurs while running screensaver. Exception: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), e);
 				throw;
 			}
-		}
-
-		private void StartFullScreen(object parameter)
-		{
-			var r = new Random();
-
-			int monIndex = (int)parameter;
-			Application.Run(new FullScreenWindow(monIndex, Cursor.Position, r.Next(250, 500)));
 		}
 
 		private void RunPreview()
@@ -142,6 +144,7 @@ namespace ScreenSaver
 
 		private static void InitTrace()
 		{
+#if DEBUG
 			var dir = Environment.ExpandEnvironmentVariables("%APPDATA%\\SinHing\\");
 			if (!System.IO.Directory.Exists(dir))
 				System.IO.Directory.CreateDirectory(Environment.ExpandEnvironmentVariables(dir));
@@ -155,6 +158,7 @@ namespace ScreenSaver
 			//	new System.Diagnostics.EventLogTraceListener("Sin Hing Screen Saver"));
 			System.Diagnostics.Trace.AutoFlush = true;
 			System.Diagnostics.Trace.TraceInformation("Trace start: {0}", DateTime.Now);
+#endif
 		}
 
 		[StructLayout(LayoutKind.Sequential)]

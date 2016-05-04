@@ -38,6 +38,7 @@ namespace ScreenSaver.ImageTransitions
 			{
 				_fade = Math.Min(1F, (float)CurrentStep / TransitionTime);
 				_backMatrix.Matrix33 = 1F - (_frontMatrix.Matrix33 = _fade);
+				State = TransitionState.Transitioning;
 			}
 
 			base.Step();

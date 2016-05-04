@@ -57,6 +57,10 @@ namespace ScreenSaver
 					Settings.Instance.ParentHandle = new IntPtr(i);
 				}
 			}
+			else
+			{
+				Settings.Instance.DisplayMode = DisplayModes.Debug;
+			}
 
 			if (Settings.Instance.ParentHandle != IntPtr.Zero)
 				Trace.TraceInformation("[{0}]: Parent Handle pass in via arguments is: '{1}'", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Settings.Instance.ParentHandle.ToInt32());

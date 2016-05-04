@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ScreenSaver
 {
@@ -10,10 +8,12 @@ namespace ScreenSaver
 	{
 		const char PathSeparator = ';';
 
-		private readonly string[] KeyPaths = { "SinHing", "ScreenSaver"};
+		private readonly string[] KeyPaths = { "SinHing", "ScreenSaver" };
 		private const string ImagePathsKeyName = "ImagePaths";
 		private const string IntervalKeyName = "Interval";
 		private const string AllMonitorsKeyName = "AllMonitors";
+		private const string TransitionEffectsName = "TransitionEffects";
+		private const string RandomizeEffectsName = "RandomizeEffects";
 
 		private static Settings _inst;
 		private List<string> _paths;
@@ -41,6 +41,10 @@ namespace ScreenSaver
 		public int Interval { get; private set; }
 
 		public DisplayModes DisplayMode { get; set; }
+
+		public ImageTransitions.TransitionEffects TransitionEffect { get; set; }
+
+		public bool RandomizeEffects { get; set; }
 
 		public IntPtr ParentHandle { get; set; }
 
@@ -89,6 +93,8 @@ namespace ScreenSaver
 			key.SetValue(ImagePathsKeyName, string.Join(PathSeparator.ToString(), _paths));
 			key.SetValue(IntervalKeyName, Interval);
 			key.SetValue(AllMonitorsKeyName, AllMonitors);
+			key.SetValue(TransitionEffectsName, (int)TransitionEffect);
+			key.SetValue(RandomizeEffectsName, RandomizeEffects ? 1 : 0);
 
 			key.Flush();
 		}
@@ -117,6 +123,9 @@ namespace ScreenSaver
 			Interval = (int)parentKey.GetValue(IntervalKeyName, 5);
 
 			AllMonitors = Convert.ToBoolean(parentKey.GetValue(AllMonitorsKeyName, 1));
+			var effs = Convert.ToInt32(parentKey.GetValue(TransitionEffectsName, (int)ImageTransitions.TransitionEffects.All));
+			TransitionEffect = (ImageTransitions.TransitionEffects)effs;
+			RandomizeEffects = Convert.ToInt32(parentKey.GetValue(RandomizeEffectsName, 1)) != 0;
 		}
 	}
 }

@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using ScreenSaver.ImageTransitions;
 
 namespace ScreenSaver
 {
@@ -9,12 +10,13 @@ namespace ScreenSaver
 	{
 		static bool _formClosing = false;
 
-		Screen _screen;
-		PaintPictures _painter;
+		bool _debug;
+		ImageTransition _transition;
 		Point _mouseLocation;
 
-		public FullScreenWindow(int monIndex, Point mouseLocation, int delay = 0)
+		public FullScreenWindow(Rectangle bounds, Point mouseLocation, int delay = 5, bool debug = false)
 		{
+			_debug = debug;
 			System.Diagnostics.Trace.TraceInformation("[{0}]: FullScreenWindow Initializing.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 			InitializeComponent();
 			FormBorderStyle = FormBorderStyle.None;
@@ -25,20 +27,15 @@ namespace ScreenSaver
 #endif
 			BackColor = Color.Black;
 
-			var screens = Screen.AllScreens;
-			if (monIndex >= screens.Length)
-				throw new InvalidOperationException();
-
-			_screen = screens[monIndex];
 			SuspendLayout();
-			Bounds = _screen.Bounds;
+			Bounds = bounds;
+			KeyPreview = true;
 			ResumeLayout();
 
-			_painter = new PaintPictures(ClientRectangle);
-			_painter.TimerTick += PainterTimerTick;
 			if (delay > 500)
 				delay = 500;
-			_painter.TickTimer.Interval += delay;
+			_transition = new ImageTransition(this, ClientRectangle, delay, TransitionEffects.Fade, //Settings.Instance.TransitionEffect,
+				Settings.Instance.RandomizeEffects, Settings.Instance.ImagePaths, true);
 
 			_mouseLocation = mouseLocation;
 #if DEBUG
@@ -64,28 +61,23 @@ namespace ScreenSaver
 			KeyPreview = true;
 			ShowInTaskbar = false;
 
-			_painter.TickTimer.Start();
-		}
-
-		private void PainterTimerTick(object sender, EventArgs e)
-		{
-			Invalidate();
+			_transition.Start();
 		}
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			base.OnPaint(e);
 
-			_painter.Paint(e.Graphics);
+			_transition.PaintTransition(e);
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
 			//			base.OnMouseMove(e);
-
-			if (_formClosing)
+			if (_formClosing || _debug)
 				return;
 
+			_transition.Stop();
 			var loc = PointToScreen(e.Location);
 
 #if DEBUG
@@ -104,13 +96,18 @@ namespace ScreenSaver
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
 			//			base.OnMouseUp(e);
+			if (_debug) return;
+
+			_transition.Stop();
 			if (!_formClosing)
 				Application.Exit();
 		}
 
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
-			//			base.OnMouseWheel(e);
+			if (_debug) return;
+
+			_transition.Stop();
 			if (!_formClosing)
 				Application.Exit();
 		}
@@ -120,7 +117,16 @@ namespace ScreenSaver
 #if DEBUG
 			System.Diagnostics.Trace.TraceInformation("[{0}]: KeyDown: Keys.{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Enum.GetName(typeof(Keys), e.KeyData));
 #endif
-			Application.Exit();
+			if (_debug)
+			{
+				if (e.KeyData == Keys.Escape && !_formClosing)
+					Application.Exit();
+				return;
+			}
+
+			_transition.Stop();
+			if (!_formClosing)
+				Application.Exit();
 		}
 
 		protected override bool IsInputKey(Keys keyData)

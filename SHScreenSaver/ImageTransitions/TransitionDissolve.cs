@@ -58,6 +58,7 @@ namespace ScreenSaver.ImageTransitions
 		{
 			lock (SyncRoot)
 			{
+				State = TransitionState.Transitioning;
 				TickTimer = new System.Timers.Timer(StepTime);
 				TickTimer.Elapsed += TimerTick;
 				TickTimer.Start();

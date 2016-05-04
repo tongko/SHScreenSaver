@@ -4,6 +4,7 @@
 	{
 		ShowConfig,
 		ShowPreview,
-		ShowSaver
+		ShowSaver,
+		Debug
 	}
 }

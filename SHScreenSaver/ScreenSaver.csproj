@@ -94,7 +94,6 @@
     <Compile Include="ImageTransitions\TransitionNone.cs" />
     <Compile Include="ImageTransitions\TransitionSlide.cs" />
     <Compile Include="PaintPictureEventArgs.cs" />
-    <Compile Include="PaintPictures.cs" />
     <Compile Include="PathListDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -139,11 +138,8 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>echo Delete file
-del /F /Q %25windir%25\system32\$(TargetName).scr
-echo copy file
-copy /Y $(TargetFileName) $(TargetName).scr
-xcopy "$(TargetName).scr" "%25windir%25\system32\" /Y</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

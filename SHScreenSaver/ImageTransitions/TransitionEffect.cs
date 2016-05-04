@@ -22,11 +22,12 @@ namespace ScreenSaver.ImageTransitions
 			SyncRoot = new object();
 			BackImage = info.BackImage;
 			FrontImage = info.FrontImage;
-			Bounds = info.WorkingArea;
+			ClientArea = info.WorkingArea;
+			MaxArea = CalculateMaxArea(BackImage, FrontImage);
 			TransitionTime = info.TransitionTime;
 			StepTime = info.StepTime;
 
-			Canvas = new Bitmap(Bounds.Width, Bounds.Height, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+			Canvas = new Bitmap(MaxArea.Width, MaxArea.Height, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
 			((Bitmap)Canvas).SetResolution(BackImage.HorizontalResolution, BackImage.VerticalResolution);
 		}
 
@@ -42,7 +43,7 @@ namespace ScreenSaver.ImageTransitions
 
 		protected Image Canvas { get; private set; }
 
-		protected Rectangle Bounds { get; set; }
+		protected Rectangle ClientArea { get; set; }
 
 		protected int TransitionTime { get; set; }
 
@@ -56,7 +57,20 @@ namespace ScreenSaver.ImageTransitions
 
 		public TransitionState State { get; protected set; }
 
+		public Rectangle MaxArea { get; protected set; }
+
 		protected object SyncRoot { get; private set; }
+
+		private Rectangle CalculateMaxArea(Image img1, Image img2)
+		{
+			var rc1 = new Rectangle(Point.Empty, img1.Size);
+			ResizeAndCenter(ref rc1);
+			var rc2 = new Rectangle(Point.Empty, img2.Size);
+			ResizeAndCenter(ref rc2);
+
+			return new Rectangle(new Point(Math.Min(rc1.X, rc2.X), Math.Min(rc1.Y, rc2.Y)),
+				new Size(Math.Max(rc1.Width, rc2.Width), Math.Max(rc1.Height, rc2.Height)));
+		}
 
 		private void DoRaiseEvent(TransitionState state, EventHandler handler)
 		{
@@ -79,7 +93,7 @@ namespace ScreenSaver.ImageTransitions
 
 		protected void ResizeAndCenter(ref Rectangle bounds, Rectangle? area = null)
 		{
-			var rc = area ?? Bounds;
+			var rc = area ?? ClientArea;
 			var maxSize = rc.Size;
 			var ratio = Math.Min((double)maxSize.Width / bounds.Width, (double)maxSize.Height / bounds.Height);
 			var newSize = new Size((int)(bounds.Width * ratio), (int)(bounds.Height * ratio));
@@ -123,6 +137,8 @@ namespace ScreenSaver.ImageTransitions
 			{
 				OnStart();
 			}
+
+			State = TransitionState.Transitioning;
 		}
 
 		public virtual void Step()
@@ -145,6 +161,7 @@ namespace ScreenSaver.ImageTransitions
 				{
 					TickTimer.Stop();
 					TickTimer.Dispose();
+					State = TransitionState.Finished;
 				}
 
 				OnStop();
@@ -157,8 +174,10 @@ namespace ScreenSaver.ImageTransitions
 			{
 				lock (SyncRoot)
 				{
+					TickTimer.Stop();
 					if (State == TransitionState.Transitioning)
 						Step();
+					TickTimer.Start();
 				}
 			}
 			catch (Exception) { }
@@ -176,8 +195,8 @@ namespace ScreenSaver.ImageTransitions
 					return new TransitionFade(info);
 				case TransitionEffects.Dissolve:
 					return new TransitionDissolve(info);
-				//case TransitionEffects.ZoomIn:
-				//case TransitionEffects.ZoomOut:
+				case TransitionEffects.ZoomIn:
+				case TransitionEffects.ZoomOut:
 				case TransitionEffects.SlideLeft:
 					return new TransitionSlide(info, SlideDirection.Left);
 				case TransitionEffects.SlideRight:
@@ -186,17 +205,15 @@ namespace ScreenSaver.ImageTransitions
 					return new TransitionSlide(info, SlideDirection.Up);
 				case TransitionEffects.SlideDown:
 					return new TransitionSlide(info, SlideDirection.Down);
-				//case TransitionEffects.All:
-				//	list.Add(new TransitionNone(info));
-				//	list.Add(new TransitionFade(info));
-				//	list.Add(new TransitionDissolve(info));
-				//	list.Add(new TransitionSlide(info, SlideDirection.Left));
-				//	list.Add(new TransitionSlide(info, SlideDirection.Right));
-				//	list.Add(new TransitionSlide(info, SlideDirection.Up));
-				//	list.Add(new TransitionSlide(info, SlideDirection.Down));
-				//	break;
 				default:
-					return new TransitionNone(info);
+					if (effects == TransitionEffects.All && info.RandomizeEffect)
+					{
+						var values = Enum.GetValues(typeof(TransitionEffects));
+						var random = new Random();
+						effects = (TransitionEffects)values.GetValue(random.Next(values.Length - 1));
+					}
+
+					return Create(effects, info);
 			}
 		}
 	}

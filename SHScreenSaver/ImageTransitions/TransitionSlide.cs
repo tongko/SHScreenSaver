@@ -33,6 +33,7 @@ namespace ScreenSaver.ImageTransitions
 				TickTimer = new System.Timers.Timer(StepTime);
 				TickTimer.Elapsed += TimerTick;
 				TickTimer.Start();
+				State = TransitionState.Transitioning;
 			}
 
 			base.Start();
@@ -41,7 +42,7 @@ namespace ScreenSaver.ImageTransitions
 		public override void Step()
 		{
 			lock (SyncRoot)
-				_distance = System.Math.Min(Bounds.Width * CurrentStep / TransitionTime, Bounds.Width);
+				_distance = System.Math.Min(ClientArea.Width * CurrentStep / TransitionTime, ClientArea.Width);
 
 			base.Step();
 		}
@@ -64,19 +65,19 @@ namespace ScreenSaver.ImageTransitions
 						switch (Direction)
 						{
 							case SlideDirection.Left:
-								rectBack.X += (Bounds.Width - _distance);
+								rectBack.X += (ClientArea.Width - _distance);
 								rectFront.X -= _distance;
 								break;
 							case SlideDirection.Right:
-								rectBack.X -= (Bounds.Width - _distance);
+								rectBack.X -= (ClientArea.Width - _distance);
 								rectFront.X += _distance;
 								break;
 							case SlideDirection.Up:
-								rectBack.Y += (Bounds.Height - _distance);
+								rectBack.Y += (ClientArea.Height - _distance);
 								rectFront.Y -= _distance;
 								break;
 							case SlideDirection.Down:
-								rectBack.Y -= (Bounds.Height - _distance);
+								rectBack.Y -= (ClientArea.Height - _distance);
 								rectFront.Y += _distance;
 								break;
 						}
