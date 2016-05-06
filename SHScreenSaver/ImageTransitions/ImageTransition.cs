@@ -106,7 +106,7 @@ namespace ScreenSaver.ImageTransitions
 				BackImage = back,
 				FrontImage = front,
 				TransitionTime = 1000,
-				StepTime = 1000 / 60,   // 60 fps
+				StepTime = 1000 / 120,   // 60 fps
 				WorkingArea = Bounds,
 				RandomizeEffect = _randomizeEffects
 			};
@@ -157,7 +157,7 @@ namespace ScreenSaver.ImageTransitions
 				{
 					img = Image.FromFile(_paths[index]);
 				}
-				catch (Exception)
+				catch
 				{
 					_paths.RemoveAt(index);
 					if (_paths.Count == 0)
@@ -181,17 +181,7 @@ namespace ScreenSaver.ImageTransitions
 					continue;
 
 				foreach (var p in paths)
-				{
-					try
-					{
-						var img = Image.FromFile(p);
-					}
-					catch (OutOfMemoryException)
-					{
-					}
-
 					imgPaths.Add(p);
-				}
 			}
 
 			return imgPaths;
