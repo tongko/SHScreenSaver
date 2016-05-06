@@ -27,9 +27,12 @@ namespace ScreenSaver
 #endif
 			BackColor = Color.Black;
 
+			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+
 			SuspendLayout();
 			Bounds = bounds;
 			KeyPreview = true;
+			DoubleBuffered = true;
 			ResumeLayout();
 
 			if (delay > 500)

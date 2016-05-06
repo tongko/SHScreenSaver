@@ -78,7 +78,7 @@ namespace ScreenSaver
 			try
 			{
 				var b = new System.Drawing.Rectangle(50, 50, 640, 360);
-				new FullScreenWindow(b, Cursor.Position, 5, true).Show();
+				new FullScreenWindow(b, Cursor.Position, 3, true).Show();
 				Application.Run();
 			}
 			catch (Exception e)

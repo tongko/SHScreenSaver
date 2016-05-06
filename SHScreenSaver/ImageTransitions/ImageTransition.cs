@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -10,15 +9,15 @@ namespace ScreenSaver.ImageTransitions
 	[Flags]
 	enum TransitionEffects
 	{
-		None = 0,
-		Fade = 0x01,
-		Dissolve = 0x02,
-		ZoomIn = 0x04,
-		ZoomOut = 0x08,
-		SlideLeft = 0x10,
-		SlideRight = 0x20,
-		SlideUp = 0x40,
-		SlideDown = 0x80,
+		None,
+		Fade,
+		Dissolve,
+		ZoomIn,
+		ZoomOut,
+		SlideLeft,
+		SlideRight,
+		SlideUp,
+		SlideDown,
 		All = Fade | Dissolve | ZoomIn | ZoomOut | SlideLeft | SlideRight | SlideUp | SlideDown
 	}
 
@@ -100,7 +99,6 @@ namespace ScreenSaver.ImageTransitions
 			var idx = GetNextIndex();
 			var back = GetImage(idx);
 			var front = GetImage(prevIdx);
-			Debug.WriteLine("_idx: {0}, prev: {1}, idx: {2}", _index, prevIdx, idx);
 
 			var effects = _effects;
 			var info = new TransitionInfo
@@ -108,7 +106,7 @@ namespace ScreenSaver.ImageTransitions
 				BackImage = back,
 				FrontImage = front,
 				TransitionTime = 1000,
-				StepTime = 1000 / 30,   // 60 fps
+				StepTime = 1000 / 120,   // 60 fps
 				WorkingArea = Bounds,
 				RandomizeEffect = _randomizeEffects
 			};
@@ -159,7 +157,7 @@ namespace ScreenSaver.ImageTransitions
 				{
 					img = Image.FromFile(_paths[index]);
 				}
-				catch (Exception)
+				catch
 				{
 					_paths.RemoveAt(index);
 					if (_paths.Count == 0)
@@ -183,17 +181,7 @@ namespace ScreenSaver.ImageTransitions
 					continue;
 
 				foreach (var p in paths)
-				{
-					try
-					{
-						var img = Image.FromFile(p);
-					}
-					catch (OutOfMemoryException)
-					{
-					}
-
 					imgPaths.Add(p);
-				}
 			}
 
 			return imgPaths;

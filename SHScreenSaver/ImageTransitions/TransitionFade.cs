@@ -73,9 +73,9 @@ namespace ScreenSaver.ImageTransitions
 					}
 				}
 				else if (State == TransitionState.Finished)
-					g.DrawImage(BackImage, rectBack);
-				else
 					g.DrawImage(FrontImage, rectFront);
+				else
+					g.DrawImage(BackImage, rectBack);
 			}
 
 			base.Draw(e);
