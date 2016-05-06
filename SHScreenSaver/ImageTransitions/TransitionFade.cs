@@ -48,8 +48,10 @@ namespace ScreenSaver.ImageTransitions
 		{
 			lock (SyncRoot)
 			{
+				Canvas = new Bitmap(MaxArea.Width, MaxArea.Height, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+				((Bitmap)Canvas).SetResolution(BackImage.HorizontalResolution, BackImage.VerticalResolution);
 				var g = Graphics.FromImage(Canvas);
-				g.Clear(Color.Black);
+				//g.Clear(Color.Black);
 
 				var rectBack = new Rectangle(Point.Empty, BackImage.Size);
 				ResizeAndCenter(ref rectBack);

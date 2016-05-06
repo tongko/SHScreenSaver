@@ -41,7 +41,7 @@ namespace ScreenSaver.ImageTransitions
 
 		protected Image BackImage { get; set; }
 
-		protected Image Canvas { get; private set; }
+		protected Image Canvas { get; set; }
 
 		protected Rectangle ClientArea { get; set; }
 
