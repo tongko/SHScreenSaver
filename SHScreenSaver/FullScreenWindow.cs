@@ -37,7 +37,7 @@ namespace ScreenSaver
 
 			if (delay > 500)
 				delay = 500;
-			_transition = new ImageTransition(this, ClientRectangle, delay, TransitionEffects.Fade, //Settings.Instance.TransitionEffect,
+			_transition = new ImageTransition(this, ClientRectangle, delay, TransitionEffects.Dissolve, //Settings.Instance.TransitionEffect,
 				Settings.Instance.RandomizeEffects, Settings.Instance.ImagePaths, true);
 
 			_mouseLocation = mouseLocation;

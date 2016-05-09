@@ -4,17 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{36E07BF4-8628-4AA7-9AA6-428F9BA7F192}</ProjectGuid>
+    <ProjectGuid>{30F39F5C-5D38-424A-BE72-B957DBE0828F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ScreenSaver</RootNamespace>
-    <AssemblyName>shscrnsave</AssemblyName>
+    <RootNamespace>DirectXTest</RootNamespace>
+    <AssemblyName>DirectXTest</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -31,31 +31,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>ScreenSaver.Program</StartupObject>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="SharpDX, Version=3.0.2.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
@@ -91,48 +66,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArgumentsParser.cs" />
-    <Compile Include="ConfigDialog.cs">
+    <Compile Include="Dummy.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ConfigDialog.Designer.cs">
-      <DependentUpon>ConfigDialog.cs</DependentUpon>
+    <Compile Include="Dummy.Designer.cs">
+      <DependentUpon>Dummy.cs</DependentUpon>
     </Compile>
-    <Compile Include="DisplayModes.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="FullScreenWindow.cs">
+    <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FullScreenWindow.Designer.cs">
-      <DependentUpon>FullScreenWindow.cs</DependentUpon>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="ImageTransitions\ImageTransition.cs" />
-    <Compile Include="ImageTransitions\TransitionDissolve.cs" />
-    <Compile Include="ImageTransitions\TransitionEffect.cs" />
-    <Compile Include="ImageTransitions\TransitionFade.cs" />
-    <Compile Include="ImageTransitions\TransitionInfo.cs" />
-    <Compile Include="ImageTransitions\TransitionNone.cs" />
-    <Compile Include="ImageTransitions\TransitionSlide.cs" />
-    <Compile Include="PaintPictureEventArgs.cs" />
-    <Compile Include="PathListDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="PathListDialog.Designer.cs">
-      <DependentUpon>PathListDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="PreviewWindow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Settings.cs" />
-    <EmbeddedResource Include="ConfigDialog.resx">
-      <DependentUpon>ConfigDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FullScreenWindow.resx">
-      <DependentUpon>FullScreenWindow.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="PathListDialog.resx">
-      <DependentUpon>PathListDialog.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -157,10 +104,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

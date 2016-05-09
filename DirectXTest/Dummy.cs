@@ -1,14 +1,20 @@
 ﻿using System.Windows.Forms;
+using SharpDX;
 using SharpDX.Direct3D;
+using SharpDX.Direct2D1;
+using SharpDX.DXGI;
+using SharpDX.IO;
+using SharpDX.WIC;
 
-namespace MultiFormTest
+namespace DirectXTest
 {
 	using System.ComponentModel;
 	using D2DDevice = SharpDX.Direct2D1.Device;
-	using D2DDeviceContext = SharpDX.Direct2D1.DeviceContext;
+	using D2DDeviceContext = DeviceContext;
 	using D3DDevice = SharpDX.Direct3D11.Device;
 	using D3DDevice1 = SharpDX.Direct3D11.Device1;
 	using D3DDeviceContext1 = SharpDX.Direct3D11.DeviceContext1;
+	using PixelFormat = SharpDX.Direct2D1.PixelFormat;
 
 	public partial class Dummy : Form
 	{
@@ -54,7 +60,7 @@ namespace MultiFormTest
 
 		private void InitDirectDraw()
 		{
-			var defaultDevice = new D3DDevice(DriverType.Hardware, DeviceCreationFlags.BgraSupport);
+			var defaultDevice = new D3DDevice(DriverType.Hardware, SharpDX.Direct3D11.DeviceCreationFlags.BgraSupport);
 			var device = defaultDevice.QueryInterface<D3DDevice1>();
 			var d3dContext = device.ImmediateContext.QueryInterface<D3DDeviceContext1>();
 
@@ -173,14 +179,10 @@ namespace MultiFormTest
 
 		protected override void OnClosing(CancelEventArgs e)
 		{
-			_device.Dispose();
 			_swapChain.Dispose();
-			_target.Dispose();
-			_view.Dispose();
 
 			base.OnClosing(e);
 		}
-
 
 	}
 }

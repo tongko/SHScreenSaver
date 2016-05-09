@@ -72,25 +72,6 @@ namespace ScreenSaver.ImageTransitions
 				new Size(Math.Max(rc1.Width, rc2.Width), Math.Max(rc1.Height, rc2.Height)));
 		}
 
-		private void DoRaiseEvent(TransitionState state, EventHandler handler)
-		{
-			lock (SyncRoot)
-			{
-				State = state;
-				if (handler == null)
-					return;
-
-				foreach (var d in handler.GetInvocationList())
-				{
-					var s = d.Target as ISynchronizeInvoke;
-					if (s != null && s.InvokeRequired)
-						s.BeginInvoke(d, new object[] { this, EventArgs.Empty });
-					else
-						d.DynamicInvoke(this, EventArgs.Empty);
-				}
-			}
-		}
-
 		protected void ResizeAndCenter(ref Rectangle bounds, Rectangle? area = null)
 		{
 			var rc = area ?? ClientArea;
@@ -116,6 +97,25 @@ namespace ScreenSaver.ImageTransitions
 			}
 		}
 
+		private void DoRaiseEvent(TransitionState state, EventHandler handler)
+		{
+			lock (SyncRoot)
+			{
+				State = state;
+				if (handler == null)
+					return;
+
+				foreach (var d in handler.GetInvocationList())
+				{
+					var s = d.Target as ISynchronizeInvoke;
+					if (s != null && s.InvokeRequired)
+						s.BeginInvoke(d, new object[] { this, EventArgs.Empty });
+					else
+						d.DynamicInvoke(this, EventArgs.Empty);
+				}
+			}
+		}
+
 		protected virtual void OnStart()
 		{
 			DoRaiseEvent(TransitionState.Started, TransitionStart);
@@ -134,9 +134,7 @@ namespace ScreenSaver.ImageTransitions
 		public virtual void Start()
 		{
 			lock (SyncRoot)
-			{
 				OnStart();
-			}
 
 			State = TransitionState.Transitioning;
 		}
