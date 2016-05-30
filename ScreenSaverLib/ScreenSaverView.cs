@@ -26,8 +26,9 @@ namespace SinHing.ScreenSaver
 
 		#region Constructor
 
-		internal ScreenSaverView(CallbackInfo callback, IntPtr parent, Rectangle bounds, int delay, bool debug = false)
+		internal ScreenSaverView(int seq, CallbackInfo callback, IntPtr parent, Rectangle bounds, int delay, bool debug = false)
 		{
+			Sequence = seq;
 			_callback = callback;
 			HInstance = System.Diagnostics.Process.GetCurrentProcess().Handle;
 			Parent = parent;
@@ -68,6 +69,8 @@ namespace SinHing.ScreenSaver
 
 
 		#region Properties
+
+		public int Sequence { get; private set; }
 
 		public Rectangle Bounds
 		{

@@ -56,7 +56,7 @@ namespace SinHing.ScreenSaver
 					ConfigDialog.ShowDialog(parent);
 					break;
 				case ScreenSaverMode.Preview:
-					var pv = new ScreenSaverView(callbackInfo, settings.ParentHandle.Handle, System.Drawing.Rectangle.Empty,
+					var pv = new ScreenSaverView(0, callbackInfo, settings.ParentHandle.Handle, System.Drawing.Rectangle.Empty,
 						settings.Interval);
 					pv.Update();
 					InternalLoop();
@@ -66,9 +66,9 @@ namespace SinHing.ScreenSaver
 					if (settings.SaveAllScreen)
 					{
 						var screens = Screen.AllScreens;
-						foreach (var screen in screens)
+						for (var i = 0; i < screens.Length; i++)
 						{
-							var v = new ScreenSaverView(callbackInfo, IntPtr.Zero, screen.Bounds,
+							var v = new ScreenSaverView(i, callbackInfo, IntPtr.Zero, screens[i].Bounds,
 								settings.Interval * 1000 + settings.InterveneDelay);
 							v.Update();
 						}
@@ -76,7 +76,7 @@ namespace SinHing.ScreenSaver
 					else
 					{
 						views = new List<ScreenSaverView>(1);
-						var sv = new ScreenSaverView(callbackInfo, IntPtr.Zero, Screen.PrimaryScreen.Bounds,
+						var sv = new ScreenSaverView(0, callbackInfo, IntPtr.Zero, Screen.PrimaryScreen.Bounds,
 							settings.Interval * 1000);
 						sv.Update();
 					}

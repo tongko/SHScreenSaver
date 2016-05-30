@@ -91,19 +91,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArgumentsParser.cs" />
     <Compile Include="ConfigDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ConfigDialog.Designer.cs">
       <DependentUpon>ConfigDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="DisplayModes.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="FullScreenWindow.cs" />
-    <Compile Include="FullScreenWindow.Designer.cs">
-      <DependentUpon>FullScreenWindow.cs</DependentUpon>
-    </Compile>
     <Compile Include="ImageTransitions\ImageTransition.cs" />
     <Compile Include="ImageTransitions\TransitionDissolve.cs" />
     <Compile Include="ImageTransitions\TransitionEffect.cs" />
@@ -111,22 +105,18 @@
     <Compile Include="ImageTransitions\TransitionInfo.cs" />
     <Compile Include="ImageTransitions\TransitionNone.cs" />
     <Compile Include="ImageTransitions\TransitionSlide.cs" />
-    <Compile Include="PaintPictureEventArgs.cs" />
+    <Compile Include="Painter.cs" />
     <Compile Include="PathListDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="PathListDialog.Designer.cs">
       <DependentUpon>PathListDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="PreviewWindow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
     <EmbeddedResource Include="ConfigDialog.resx">
       <DependentUpon>ConfigDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FullScreenWindow.resx">
-      <DependentUpon>FullScreenWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PathListDialog.resx">
       <DependentUpon>PathListDialog.cs</DependentUpon>
