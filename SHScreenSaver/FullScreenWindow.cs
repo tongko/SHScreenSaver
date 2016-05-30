@@ -1,143 +1,181 @@
-﻿using System;
-using System.ComponentModel;
-using System.Drawing;
-using System.Windows.Forms;
-using ScreenSaver.ImageTransitions;
+﻿//using System;
+//using System.ComponentModel;
+//using System.Drawing;
+//using System.Windows.Forms;
+//using ScreenSaver.ImageTransitions;
 
-namespace ScreenSaver
-{
-	public partial class FullScreenWindow : Form
-	{
-		static bool _formClosing = false;
+//namespace ScreenSaver
+//{
+//	public partial class FullScreenWindow : Form
+//	{
+//		static bool _formClosing = false;
 
-		bool _debug;
-		ImageTransition _transition;
-		Point _mouseLocation;
+//		bool _debug;
+//		ImageTransition _transition;
+//		Point _mouseLocation;
+//		PointF _dpi;
+//		System.Timers.Timer _timer;
 
-		public FullScreenWindow(Rectangle bounds, Point mouseLocation, int delay = 5, bool debug = false)
-		{
-			_debug = debug;
-			System.Diagnostics.Trace.TraceInformation("[{0}]: FullScreenWindow Initializing.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-			InitializeComponent();
-			FormBorderStyle = FormBorderStyle.None;
-#if DEBUG
-			TopMost = false;
-#else
-			TopMost = true;
-#endif
-			BackColor = Color.Black;
+//		public FullScreenWindow(Rectangle bounds, Point mouseLocation, int delay = 5, bool debug = false)
+//		{
+//			_debug = debug;
+//			System.Diagnostics.Trace.TraceInformation("[{0}]: FullScreenWindow Initializing.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+//			InitializeComponent();
 
-			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+//			SuspendLayout();
+//			FormBorderStyle = FormBorderStyle.None;
+//#if DEBUG
+//			TopMost = false;
+//#else
+//			TopMost = true;
+//#endif
+//			BackColor = Color.Black;
 
-			SuspendLayout();
-			Bounds = bounds;
-			KeyPreview = true;
-			DoubleBuffered = true;
-			ResumeLayout();
+//			//			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
 
-			if (delay > 500)
-				delay = 500;
-			_transition = new ImageTransition(this, ClientRectangle, delay, TransitionEffects.Dissolve, //Settings.Instance.TransitionEffect,
-				Settings.Instance.RandomizeEffects, Settings.Instance.ImagePaths, true);
+//			Bounds = bounds;
+//			KeyPreview = true;
+//			//			DoubleBuffered = true;
+//			ResumeLayout();
 
-			_mouseLocation = mouseLocation;
-#if DEBUG
-			System.Diagnostics.Trace.TraceInformation("[{0}] Starting mouse position: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), _mouseLocation);
-#endif
-			Cursor.Hide();
-		}
+//			if (delay > 500)
+//				delay = 500;
 
-		protected override void OnClosing(CancelEventArgs e)
-		{
-			base.OnClosing(e);
+//			_mouseLocation = mouseLocation;
+//#if DEBUG
+//			System.Diagnostics.Trace.TraceInformation("[{0}] Starting mouse position: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), _mouseLocation);
+//#endif
 
-			_formClosing = true;
-			e.Cancel = false;
-		}
+//			_timer = new System.Timers.Timer(Settings.Instance.Interval * 1000);
+//			_timer.Elapsed += TimerTicked;
 
-		protected override void OnLoad(EventArgs e)
-		{
-			base.OnLoad(e);
+//			using (var g = CreateGraphics())
+//				_dpi = new PointF(g.DpiX, g.DpiY);
 
-			BringToFront();
-			Focus();
-			KeyPreview = true;
-			ShowInTaskbar = false;
+//			Cursor.Hide();
+//		}
 
-			_transition.Start();
-		}
+//		protected override void OnHandleCreated(EventArgs e)
+//		{
+//			base.OnHandleCreated(e);
 
-		protected override void OnPaint(PaintEventArgs e)
-		{
-			base.OnPaint(e);
+//			_transition = new ImageTransition(this.Handle, ClientRectangle, TransitionEffects.Fade, //Settings.Instance.TransitionEffect,
+//				Settings.Instance.RandomizeEffects, Settings.Instance.ImagePaths, true, _dpi);
+//		}
 
-			_transition.PaintTransition(e);
-		}
+//		protected override void OnSizeChanged(EventArgs e)
+//		{
+//			base.OnSizeChanged(e);
 
-		protected override void OnMouseMove(MouseEventArgs e)
-		{
-			//			base.OnMouseMove(e);
-			if (_formClosing || _debug)
-				return;
+//			if (!IsHandleCreated)
+//				return;
 
-			_transition.Stop();
-			var loc = PointToScreen(e.Location);
+//			if (_transition != null)
+//				_transition.Dispose();
 
-#if DEBUG
-			System.Diagnostics.Trace.TraceInformation("[{0}]: Mouse move location: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), loc);
-#endif
+//			_transition = new ImageTransition(Handle, ClientRectangle, TransitionEffects.Fade,
+//				Settings.Instance.RandomizeEffects, Settings.Instance.ImagePaths, true, _dpi);
+//		}
 
-			var deltaX = loc.X - _mouseLocation.X;
-			var deltaY = loc.Y - _mouseLocation.Y;
+//		private void TimerTicked(object sender, System.Timers.ElapsedEventArgs e)
+//		{
+//			_timer.Stop();
+//			_transition.Start();
+//			_timer.Start();
+//		}
 
-			if (deltaX > 3 || deltaX < -3 || deltaY > 3 || deltaY < -3)
-			{
-				Application.Exit();
-			}
-		}
+//		protected override void OnClosing(CancelEventArgs e)
+//		{
+//			base.OnClosing(e);
 
-		protected override void OnMouseUp(MouseEventArgs e)
-		{
-			//			base.OnMouseUp(e);
-			if (_debug) return;
+//			_formClosing = true;
+//			e.Cancel = false;
+//		}
 
-			_transition.Stop();
-			if (!_formClosing)
-				Application.Exit();
-		}
+//		protected override void OnLoad(EventArgs e)
+//		{
+//			base.OnLoad(e);
 
-		protected override void OnMouseWheel(MouseEventArgs e)
-		{
-			if (_debug) return;
+//			//BringToFront();
+//			//Focus();
+//			KeyPreview = true;
+//			ShowInTaskbar = false;
 
-			_transition.Stop();
-			if (!_formClosing)
-				Application.Exit();
-		}
+//			_transition.Start();
+//			_timer.Start();
+//		}
 
-		protected override void OnKeyDown(KeyEventArgs e)
-		{
-#if DEBUG
-			System.Diagnostics.Trace.TraceInformation("[{0}]: KeyDown: Keys.{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Enum.GetName(typeof(Keys), e.KeyData));
-#endif
-			if (_debug)
-			{
-				if (e.KeyData == Keys.Escape && !_formClosing)
-					Application.Exit();
-				return;
-			}
+//		//protected override void OnPaint(PaintEventArgs e)
+//		//{
+//		//	base.OnPaint(e);
 
-			_transition.Stop();
-			if (!_formClosing)
-				Application.Exit();
-		}
+//		//	_transition.PaintTransition();
+//		//}
 
-		protected override bool IsInputKey(Keys keyData)
-		{
-#if DEBUG
-			System.Diagnostics.Trace.TraceInformation("[{0}]: keyData: Keys.{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Enum.GetName(typeof(Keys), keyData));
-#endif
-			return true;
-		}
-	}
-}
+//		protected override void OnMouseMove(MouseEventArgs e)
+//		{
+//			//			base.OnMouseMove(e);
+//			if (_formClosing || _debug)
+//				return;
+
+//			_transition.Stop();
+//			var loc = PointToScreen(e.Location);
+
+//#if DEBUG
+//			System.Diagnostics.Trace.TraceInformation("[{0}]: Mouse move location: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), loc);
+//#endif
+
+//			var deltaX = loc.X - _mouseLocation.X;
+//			var deltaY = loc.Y - _mouseLocation.Y;
+
+//			if (deltaX > 3 || deltaX < -3 || deltaY > 3 || deltaY < -3)
+//			{
+//				Application.Exit();
+//			}
+//		}
+
+//		protected override void OnMouseUp(MouseEventArgs e)
+//		{
+//			//			base.OnMouseUp(e);
+//			if (_debug) return;
+
+//			_transition.Stop();
+//			if (!_formClosing)
+//				Application.Exit();
+//		}
+
+//		protected override void OnMouseWheel(MouseEventArgs e)
+//		{
+//			if (_debug) return;
+
+//			_transition.Stop();
+//			if (!_formClosing)
+//				Application.Exit();
+//		}
+
+//		protected override void OnKeyDown(KeyEventArgs e)
+//		{
+//#if DEBUG
+//			System.Diagnostics.Trace.TraceInformation("[{0}]: KeyDown: Keys.{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Enum.GetName(typeof(Keys), e.KeyData));
+//#endif
+//			if (_debug)
+//			{
+//				if (e.KeyData == Keys.Escape && !_formClosing)
+//					Application.Exit();
+//				return;
+//			}
+
+//			_transition.Stop();
+//			if (!_formClosing)
+//				Application.Exit();
+//		}
+
+//		protected override bool IsInputKey(Keys keyData)
+//		{
+//#if DEBUG
+//			System.Diagnostics.Trace.TraceInformation("[{0}]: keyData: Keys.{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Enum.GetName(typeof(Keys), keyData));
+//#endif
+//			return true;
+//		}
+//	}
+//}

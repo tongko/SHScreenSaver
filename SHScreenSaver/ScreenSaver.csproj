@@ -100,9 +100,7 @@
     </Compile>
     <Compile Include="DisplayModes.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="FullScreenWindow.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="FullScreenWindow.cs" />
     <Compile Include="FullScreenWindow.Designer.cs">
       <DependentUpon>FullScreenWindow.cs</DependentUpon>
     </Compile>
@@ -155,6 +153,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ScreenSaverLib\ScreenSaverLib.csproj">
+      <Project>{46021eb2-305f-4b91-90e2-4b392bd0a4b4}</Project>
+      <Name>ScreenSaverLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

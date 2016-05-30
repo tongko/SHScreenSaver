@@ -3,11 +3,11 @@ using System.Linq;
 
 namespace SinHing.ScreenSaver
 {
-	internal class ParseArguments
+	public sealed class ParseArguments
 	{
-		private Settings _settings;
+		private ScreenSaverSettings _settings;
 
-		public ParseArguments(Settings setting)
+		public ParseArguments(ScreenSaverSettings setting)
 		{
 			if (setting == null)
 				throw new ArgumentNullException("setting");

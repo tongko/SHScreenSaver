@@ -1,12 +1,12 @@
-﻿using System;
+﻿//using System;
 
-namespace ScreenSaver
-{
-	class PaintPictureEventArgs
-		: EventArgs
-	{
-		public new static readonly PaintPictureEventArgs Empty = new PaintPictureEventArgs { Effect = null };
+//namespace ScreenSaver
+//{
+//	class PaintPictureEventArgs
+//		: EventArgs
+//	{
+//		public new static readonly PaintPictureEventArgs Empty = new PaintPictureEventArgs { Effect = null };
 
-		public ImageTransitions.TransitionEffect Effect { get; set; }
-	}
-}
+//		public ImageTransitions.TransitionEffect Effect { get; set; }
+//	}
+//}

@@ -40,7 +40,7 @@ namespace ScreenSaver
 
 		public int Interval { get; private set; }
 
-		public DisplayModes DisplayMode { get; set; }
+		//public DisplayModes DisplayMode { get; set; }
 
 		public ImageTransitions.TransitionEffects TransitionEffect { get; set; }
 
