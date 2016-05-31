@@ -9,6 +9,7 @@ namespace SinHing.ScreenSaver
 		#region Fields
 
 		private const string WndClassName = "SH.ScreenSaver.View";
+
 		private bool _disposedValue = false; // To detect redundant calls
 		private bool _handleCreated = false;
 		private Size _size;
@@ -20,6 +21,7 @@ namespace SinHing.ScreenSaver
 		private System.Timers.Timer _timer;
 		private bool _eventArgsEmpty = true;
 		private ScreenSaverCallbackEventArgs _eventArgs;
+		private WndProcHandler _wndProc;
 
 		#endregion
 
@@ -28,6 +30,7 @@ namespace SinHing.ScreenSaver
 
 		internal ScreenSaverView(int seq, CallbackInfo callback, IntPtr parent, Rectangle bounds, int delay, bool debug = false)
 		{
+			System.Diagnostics.Debug.WriteLine("Timer interval: {0}", delay);
 			Sequence = seq;
 			_callback = callback;
 			HInstance = System.Diagnostics.Process.GetCurrentProcess().Handle;
@@ -59,11 +62,11 @@ namespace SinHing.ScreenSaver
 
 		#region Events
 
-		public event EventHandler Closing;
-		public event EventHandler Closed;
-		public event EventHandler HandleCreated;
-		public event EventHandler HandleDestroyed;
-		public event EventHandler SizeChanged;
+		//public event EventHandler Closing;
+		//public event EventHandler Closed;
+		//public event EventHandler HandleCreated;
+		//public event EventHandler HandleDestroyed;
+		//public event EventHandler SizeChanged;
 
 		#endregion
 
@@ -160,19 +163,20 @@ namespace SinHing.ScreenSaver
 				return;
 
 			Unsafe.UpdateWindow(Handle);
-			Unsafe.ShowWindow(Handle, Unsafe.SW_SHOW);
 		}
 
 		private void RegisterWindowClass()
 		{
-			var wc = new Unsafe.WNDCLASSEX();
+			Unsafe.WNDCLASSEX wc;
 			if (Unsafe.GetClassInfoEx(HInstance, WndClassName, out wc))
 				return;
 
+			wc = new Unsafe.WNDCLASSEX();
 			wc.cbSize = Marshal.SizeOf(typeof(Unsafe.WNDCLASSEX));
 
 			wc.style = Unsafe.CS_VREDRAW | Unsafe.CS_HREDRAW | Unsafe.CS_SAVEBITS | Unsafe.CS_DBLCLKS;
-			wc.lpfnWndProc = new WndProcHandler(WndProc);
+			_wndProc = new WndProcHandler(WndProc);
+			wc.lpfnWndProc = _wndProc;
 			wc.cbClsExtra = 0;
 			wc.cbWndExtra = 0;
 			wc.hInstance = HInstance;
@@ -204,12 +208,12 @@ namespace SinHing.ScreenSaver
 			{
 				if (_debugMode)
 				{
-					Handle = Unsafe.CreateWindowEx(0, WndClassName, null,
-						0, 50, 50, 640, 360, IntPtr.Zero, IntPtr.Zero, HInstance, IntPtr.Zero);
+					Handle = Unsafe.CreateWindowEx(Unsafe.WS_EX_APPWINDOW, WndClassName, null,
+						Unsafe.WS_POPUP, 50, 50, 640, 360, IntPtr.Zero, IntPtr.Zero, HInstance, IntPtr.Zero);
 				}
 				else
-					Handle = Unsafe.CreateWindowEx(0, WndClassName, null,
-						  Unsafe.WS_EX_TOPMOST, 0, 0, _size.Width, _size.Height, Parent, IntPtr.Zero,
+					Handle = Unsafe.CreateWindowEx(Unsafe.WS_EX_TOPMOST, WndClassName, null,
+						  Unsafe.WS_POPUP, 0, 0, _size.Width, _size.Height, Parent, IntPtr.Zero,
 						  HInstance, IntPtr.Zero);
 			}
 			if (Handle == IntPtr.Zero)
@@ -220,6 +224,8 @@ namespace SinHing.ScreenSaver
 			_eventArgs = new ScreenSaverCallbackEventArgs(this);
 			_eventArgsEmpty = false;
 			_handleCreated = true;
+			Unsafe.ShowWindow(Handle, Unsafe.SW_SHOW);
+			Unsafe.SetFocus(Handle);
 			OnHandleCreated();
 		}
 
@@ -266,6 +272,9 @@ namespace SinHing.ScreenSaver
 		{
 			switch (msg)
 			{
+				case Unsafe.WM_SETFOCUS:
+					System.Diagnostics.Debug.WriteLine("Apps get focus.");
+					break;
 				case Unsafe.WM_MOUSEMOVE:
 					if (IsPreview || _debugMode)
 						break;
@@ -289,8 +298,10 @@ namespace SinHing.ScreenSaver
 					if (wParam == UIntPtr.Zero)
 						Close();
 					break;
+				case Unsafe.WM_COMMAND:
 				case Unsafe.WM_SYSKEYDOWN:
 				case Unsafe.WM_KEYDOWN:
+					System.Diagnostics.Debug.WriteLine("Key down!");
 					if (IsPreview)
 						break;
 					if (_debugMode)
@@ -301,6 +312,15 @@ namespace SinHing.ScreenSaver
 							break;
 					}
 					Close();
+					break;
+				case Unsafe.WM_PAINT:
+					Unsafe.PAINTSTRUCT ps;
+					Unsafe.BeginPaint(hwnd, out ps);
+
+					DoRaiseEvent(this, _callback.TimerCallback, _eventArgs);
+					System.Diagnostics.Debug.WriteLine("WM_PAINT fired. IsPreview: {0}, IsDebug: {1}", IsPreview, _debugMode);
+
+					Unsafe.EndPaint(hwnd, ref ps);
 					break;
 				case Unsafe.WM_CLOSE:
 					//OnClosing();

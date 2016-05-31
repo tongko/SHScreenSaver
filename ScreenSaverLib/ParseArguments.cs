@@ -31,8 +31,10 @@ namespace SinHing.ScreenSaver
 					_settings.SetScreenSaverMode(ScreenSaverMode.Preview);
 				else if (c.Equals('c') || c.Equals('C'))
 					_settings.SetScreenSaverMode(ScreenSaverMode.ConfigDialog);
+				else if (c.Equals('d') || c.Equals('D'))
+					_settings.SetScreenSaverMode(ScreenSaverMode.Debug);
 
-				if (_settings.Mode == ScreenSaverMode.FullScreen)
+				if (_settings.Mode == ScreenSaverMode.FullScreen || _settings.Mode == ScreenSaverMode.Debug)
 					return;
 
 				int pointer;

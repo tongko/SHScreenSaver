@@ -97,6 +97,7 @@
     <Compile Include="ConfigDialog.Designer.cs">
       <DependentUpon>ConfigDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="D2DPainter.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ImageTransitions\ImageTransition.cs" />
     <Compile Include="ImageTransitions\TransitionDissolve.cs" />

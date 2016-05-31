@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Windows.Forms;
 using SinHing.ScreenSaver;
 
 namespace ScreenSaver
@@ -11,7 +12,13 @@ namespace ScreenSaver
 		[STAThread]
 		static void Main(string[] args)
 		{
+			Application.EnableVisualStyles();
+			Application.SetCompatibleTextRenderingDefault(false);
+
 			var settings = new ScreenSaverSettings();
+			var parser = new ParseArguments(settings);
+			parser.Parse(args);
+
 			settings.Interval = Settings.Instance.Interval;
 			settings.InterveneDelay = 300;
 			settings.SaveAllScreen = Settings.Instance.AllMonitors;
@@ -35,8 +42,7 @@ namespace ScreenSaver
 
 		private static void OnTimer(object sender, ScreenSaverCallbackEventArgs e)
 		{
-			var view = e.View;
-			_views[view.Sequence]?.DoPainting();
+			_views[e.View.Sequence]?.DoPainting();
 		}
 
 		private static void OnDestroy(object sender, ScreenSaverCallbackEventArgs e)

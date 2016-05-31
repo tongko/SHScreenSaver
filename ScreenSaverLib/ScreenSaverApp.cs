@@ -47,6 +47,7 @@ namespace SinHing.ScreenSaver
 			callbackInfo.TimerCallback = TimerCallback;
 			callbackInfo.LoopCallback = LoopCallback;
 			callbackInfo.DestroyCallback = DestroyCallback;
+			var delay = settings.Interval * 1000;
 
 			switch (settings.Mode)
 			{
@@ -57,7 +58,7 @@ namespace SinHing.ScreenSaver
 					break;
 				case ScreenSaverMode.Preview:
 					var pv = new ScreenSaverView(0, callbackInfo, settings.ParentHandle.Handle, System.Drawing.Rectangle.Empty,
-						settings.Interval);
+						delay);
 					pv.Update();
 					InternalLoop();
 					break;
@@ -69,7 +70,7 @@ namespace SinHing.ScreenSaver
 						for (var i = 0; i < screens.Length; i++)
 						{
 							var v = new ScreenSaverView(i, callbackInfo, IntPtr.Zero, screens[i].Bounds,
-								settings.Interval * 1000 + settings.InterveneDelay);
+								delay + settings.InterveneDelay);
 							v.Update();
 						}
 					}
@@ -77,10 +78,16 @@ namespace SinHing.ScreenSaver
 					{
 						views = new List<ScreenSaverView>(1);
 						var sv = new ScreenSaverView(0, callbackInfo, IntPtr.Zero, Screen.PrimaryScreen.Bounds,
-							settings.Interval * 1000);
+							delay);
 						sv.Update();
 					}
 
+					InternalLoop();
+					break;
+				case ScreenSaverMode.Debug:
+					var dv = new ScreenSaverView(0, callbackInfo, IntPtr.Zero, new System.Drawing.Rectangle(50, 50, 640, 360),
+						delay, true);
+					dv.Update();
 					InternalLoop();
 					break;
 				default:

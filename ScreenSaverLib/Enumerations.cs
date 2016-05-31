@@ -2,6 +2,7 @@
 {
 	public enum ScreenSaverMode
 	{
+		Debug,
 		ConfigDialog,
 		Preview,
 		FullScreen

@@ -24,6 +24,7 @@ namespace SinHing.ScreenSaver
 		public const int CS_SAVEBITS = 0x0800;
 		public const int CS_DBLCLKS = 0x0008;
 
+		public const int WS_POPUP = -2147483648;
 		public const int WS_CAPTION = 0xc00000;
 		public const int WS_CHILD = 0x40000000;
 		public const int WS_MAXIMIZEBOX = 0x10000;
@@ -34,6 +35,7 @@ namespace SinHing.ScreenSaver
 		public const int WS_OVERLAPPEDWINDOW = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_SIZEFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
 
 		public const int WS_EX_TOPMOST = 0x00000008;
+		public const int WS_EX_APPWINDOW = 0x00040000;
 
 		public const int GWLP_HWNDPARENT = -8;
 		public const int GWLP_USERDATA = -21;
@@ -45,9 +47,11 @@ namespace SinHing.ScreenSaver
 		public const int WM_ACTIVATE = 0x0006;
 		public const int WM_CLOSE = 0x0010;
 		public const int WM_PAINT = 0x000F;
-		public const int WM_MOUSEMOVE = 0x0200F;
-		public const int WM_SYSKEYDOWN = 0x0104F;
-		public const int WM_KEYDOWN = 0x0100F;
+		public const int WM_MOUSEMOVE = 0x0200;
+		public const int WM_SYSKEYDOWN = 0x0104;
+		public const int WM_KEYDOWN = 0x0100;
+		public const int WM_COMMAND = 0x0111;
+		public const int WM_SETFOCUS = 0x0007;
 
 
 		public const int IDC_ARROW = 32512;
@@ -177,10 +181,10 @@ namespace SinHing.ScreenSaver
 			return ((short)(((l.ToInt32()) >> 16) & 0xffff));
 		}
 
-		[DllImport("user32.dll", EntryPoint = "RegisterClassExW", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", EntryPoint = "RegisterClassExW", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern ushort RegisterClassEx([In] ref WNDCLASSEX lpWndClass);
 
-		[DllImport("user32.dll", EntryPoint = "CreateWindowExW", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", EntryPoint = "CreateWindowExW", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern HWND CreateWindowEx(
 			[In] int dwExStyle,
 			[MarshalAs(UnmanagedType.LPWStr)]
@@ -197,10 +201,10 @@ namespace SinHing.ScreenSaver
 			[In, Optional] HINSTANCE hInstance,
 			[In, Optional] LPVOID lpParam);
 
-		[DllImport("user32.dll", EntryPoint = "DefWindowProcW", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", EntryPoint = "DefWindowProcW", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern LRESULT DefWindowProc(HWND hwnd, int msg, UIntPtr wParam, IntPtr lParam);
 
-		[DllImport("user32.dll", EntryPoint = "GetWindowLongW", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", EntryPoint = "GetWindowLongW", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern IntPtr GetWindowLong(HWND hwnd, int index);
 
 		/// <summary>
@@ -218,67 +222,70 @@ namespace SinHing.ScreenSaver
 		/// information. To determine success or failure, clear the last error information by calling SetLastError with 0, then call
 		/// SetWindowLongPtr.Function failure will be indicated by a return value of zero and a GetLastError result that is nonzero.
 		/// </returns>
-		[DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern IntPtr SetWindowLongPtr([In] HWND hwnd, [In] int index, [In] IntPtr newLong);
 
-		[DllImport("user32.dll", EntryPoint = "LoadCursorW", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", EntryPoint = "LoadCursorW", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern IntPtr LoadCursor([In, Optional] HINSTANCE hInstance, [In] ushort lpCursorName);
 
-		[DllImport("gdi32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("gdi32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern IntPtr CreateSolidBrush([In] int crColor);
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern bool GetClientRect([In] HWND hWnd, [Out] out RECT lpRect);
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern bool ShowWindow([In] HWND hwnd, [In] int nCmdShow);
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern bool UpdateWindow([In] HWND hwnd);
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
 		public static extern int DispatchMessage(ref MSG m);
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
 		public static extern int GetMessage([Out] out MSG m, [In, Optional] HWND hwnd, [In] int wMsgFilterMin, [In] int wMsgFilterMax);
 
-		[DllImport("user32.dll", EntryPoint = "PeekMessageW", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", EntryPoint = "PeekMessageW", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern bool PeekMessage([Out] out MSG m, [In, Optional] HWND hwnd, [In] int wMsgFilterMin, [In] int wMsgFilterMax, [In] int wRemoveMsg);
 
-		[DllImport("Winmm.dll", EntryPoint = "timeGetTime", CallingConvention = CallingConvention.StdCall, SetLastError = false)]
+		[DllImport("Winmm.dll", EntryPoint = "timeGetTime", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
 		public static extern uint TimeGetTime();
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern IntPtr GetDC([In] HWND hwnd);
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern int ReleaseDC([In] HWND hwnd, [In] IntPtr HDC);
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern void PostQuitMessage([In] int nExitCode);
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 
 		public static extern bool DestroyWindow([In] HWND hwnd);
 
-		[DllImport("user32.dll", EntryPoint = "PostMessageW", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", EntryPoint = "PostMessageW", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern bool PostMessage([In, Optional] HWND hwnd, [In] int msg, [In] UIntPtr wParam, [In] IntPtr lParam);
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern IntPtr BeginPaint([In] HWND hwnd, [Out] out PAINTSTRUCT lpPaint);
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern bool EndPaint([In] HWND hWnd, [In] ref PAINTSTRUCT lpPaint);
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern bool InvalidateRect([In] HWND hwnd, [In] ref RECT lpRect, [In] bool erase);
 
-		[DllImport("user32.dll", EntryPoint = "RegisterClassExW", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", EntryPoint = "GetClassInfoExW", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern bool GetClassInfoEx([In, Optional] HINSTANCE hinst, [In] string lpszClass, [Out] out WNDCLASSEX lpwcx);
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern bool SetWindowPos([In] HWND hWnd, [In, Optional] HWND hWndInsertAfter, [In] int x, [In] int y,
 			[In] int cx, [In] int cy, [In, MarshalAs(UnmanagedType.SysUInt)] SWP uFlags);
+
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
+		public static extern HWND SetFocus([In, Optional] HWND hWnd);
 
 		/// <summary>
 		/// Retrieves the dimensions of the bounding rectangle of the specified window. The dimensions are given in screen coordinates 
@@ -290,16 +297,16 @@ namespace SinHing.ScreenSaver
 		/// <returns>If the function succeeds, the return value is nonzero.<br/>
 		/// If the function fails, the return value is zero. To get extended error information, call <see cref="System.Runtime.InteropServices.Marshal.GetLastWin32Error"/>.
 		/// </returns>
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern bool GetWindowRect([In] HWND hWnd, [Out] out RECT lpRect);
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern HWND SetParent([In] HWND hWndChild, [In, Optional] HWND hWndNewParent);
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern int ShowCursor([In] bool bShow);
 
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = false)]
+		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
 		public static extern uint SetTimer([In, Optional] HWND hWnd, [In] uint nIDEvent, [In] uint uElapse,
 			[In, Optional] TimerProcHandler lpTimerFunc);
 
