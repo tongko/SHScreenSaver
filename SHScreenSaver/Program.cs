@@ -1,194 +1,55 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Threading;
+using System.Collections.Generic;
 using System.Windows.Forms;
+using SinHing.ScreenSaver;
 
 namespace ScreenSaver
 {
 	class Program
 	{
-		internal const string MutexName = "ScreenSaver-36e07bf4-8628-4aa7-9aa6-428f9ba7f192";
-		private static Mutex _mutex;
+		static List<Painter> _views = new List<Painter>(100);
 
-		/// <summary>
-		/// The main entry point for the application.
-		/// </summary>
 		[STAThread]
 		static void Main(string[] args)
 		{
-			InitTrace();
-			if (PreviousInstanceExists())
-			{
-				System.Diagnostics.Trace.TraceInformation("[{0}] Another instance is running, quit application.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-				return;
-			}
-
-			if (args == null)
-				args = new string[0];
-
-			ArgumentsParser.Instance.Parse(args);
-			var p = new Program();
-			p.Run();
-		}
-
-		static bool PreviousInstanceExists()
-		{
-			try
-			{
-				_mutex = Mutex.OpenExisting(MutexName);
-				if (_mutex != null)
-					return true;
-			}
-			catch (WaitHandleCannotBeOpenedException)
-			{
-				_mutex = new Mutex(true, MutexName);
-			}
-			return false;
-		}
-
-		Program()
-		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
+
+			var settings = new ScreenSaverSettings();
+			var parser = new ParseArguments(settings);
+			parser.Parse(args);
+
+			settings.Interval = Settings.Instance.Interval;
+			settings.InterveneDelay = 300;
+			settings.SaveAllScreen = Settings.Instance.AllMonitors;
+
+			var ssApp = new ScreenSaverApp();
+			ssApp.ConfigDialog = new ConfigDialog();
+			ssApp.CreateCallback = OnCreate;
+			ssApp.DestroyCallback = OnDestroy;
+			ssApp.TimerCallback = OnTimer;
+			ssApp.Run(settings);
 		}
 
-		private void Run()
+		private static void OnCreate(object sender, ScreenSaverCallbackEventArgs e)
 		{
-			Trace.TraceInformation("[{0}]: Settings.Instance.DisplayMode is {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), Enum.GetName(typeof(DisplayModes), Settings.Instance.DisplayMode));
-			switch (Settings.Instance.DisplayMode)
-			{
-				case DisplayModes.ShowConfig:
-					RunShowConfig();
-					break;
-				case DisplayModes.ShowPreview:
-					RunPreview();
-					break;
-				case DisplayModes.ShowSaver:
-					RunFullScreen();
-					break;
-				default:
-					RunDebugScreen();
-					break;
-			}
+			var view = sender as ScreenSaverView;
+			if (view == null)
+				return;
+
+			_views.Insert(view.Sequence, new Painter(view));
 		}
 
-		private void RunDebugScreen()
+		private static void OnTimer(object sender, ScreenSaverCallbackEventArgs e)
 		{
-			try
-			{
-				var b = new System.Drawing.Rectangle(50, 50, 640, 360);
-				new FullScreenWindow(b, Cursor.Position, 3, true).Show();
-				Application.Run();
-			}
-			catch (Exception e)
-			{
-				Trace.TraceError("[{0}]: Error occurs while running screensaver. Exception: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), e);
-				throw;
-			}
+			_views[e.View.Sequence]?.DoPainting();
 		}
 
-		private void RunShowConfig()
+		private static void OnDestroy(object sender, ScreenSaverCallbackEventArgs e)
 		{
-			try
-			{
-				Trace.TraceInformation("[{0}]: Begin config settings.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-
-				var config = new ConfigDialog();
-				var settings = Settings.Instance;
-				if (settings.ParentHandle != IntPtr.Zero)
-				{
-					var parent = new NativeWindow();
-					parent.AssignHandle(settings.ParentHandle);
-					config.ShowDialog(parent);
-				}
-				else
-					config.ShowDialog();
-			}
-			catch (Exception e)
-			{
-				Trace.TraceError("[{0}]: Error occurs while running screensaver settings. Exception: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), e);
-				throw;
-			}
+			var view = e.View;
+			_views[view.Sequence].Dispose();
+			_views[view.Sequence] = null;
 		}
-
-		private void RunFullScreen()
-		{
-			try
-			{
-				Trace.TraceInformation("[{0}]: Begin run full screen.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-				if (Settings.Instance.AllMonitors)
-				{
-					var screens = Screen.AllScreens;
-					for (int i = 0; i < screens.Length; i++)
-					{
-						var b = screens[i].Bounds;
-						new FullScreenWindow(b, Cursor.Position).Show();
-					}
-				}
-
-				Application.Run();
-			}
-			catch (Exception e)
-			{
-				Trace.TraceError("[{0}]: Error occurs while running screensaver. Exception: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), e);
-				throw;
-			}
-		}
-
-		private void RunPreview()
-		{
-			var pWnd = new PreviewWindow(Settings.Instance.ParentHandle);
-			pWnd.Run();
-		}
-
-		private static void InitTrace()
-		{
-#if DEBUG
-			var dir = Environment.ExpandEnvironmentVariables("%APPDATA%\\SinHing\\");
-			if (!System.IO.Directory.Exists(dir))
-				System.IO.Directory.CreateDirectory(Environment.ExpandEnvironmentVariables(dir));
-			if (!System.IO.Directory.Exists(dir + "Logs"))
-				System.IO.Directory.CreateDirectory(Environment.ExpandEnvironmentVariables(dir + "Logs"));
-
-			System.Diagnostics.Trace.Listeners.Clear();
-			System.Diagnostics.Trace.Listeners.Add(
-				new System.Diagnostics.TextWriterTraceListener(dir + "Logs\\Trace.log"));
-			//System.Diagnostics.Trace.Listeners.Add(
-			//	new System.Diagnostics.EventLogTraceListener("Sin Hing Screen Saver"));
-			System.Diagnostics.Trace.AutoFlush = true;
-			System.Diagnostics.Trace.TraceInformation("Trace start: {0}", DateTime.Now);
-#endif
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		struct POINT
-		{
-			public int x;
-			public int y;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		struct MSG
-		{
-			public IntPtr hwnd;
-			public int message;
-			public UIntPtr wParam;
-			public IntPtr lParam;
-			public int time;
-			public POINT pt;
-		}
-
-		const int PM_NOREMOVE = 0;
-
-
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = false)]
-		private static extern int DispatchMessage(ref MSG m);
-
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = false)]
-		private static extern bool GetMessage(ref MSG m, IntPtr hwnd, int wMsgFilterMin, int wMsgFilterMax);
-
-		[DllImport("user32.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = false)]
-		private static extern bool PeekMessage(ref MSG m, IntPtr hwnd, int wMsgFilterMin, int wMsgFilterMax, int wRemoveMsg);
 	}
 }

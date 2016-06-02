@@ -15,7 +15,15 @@ namespace ScreenSaver.ImageTransitions
 
 	abstract class TransitionEffect
 	{
+		#region Fields
+
 		Timer _tickTimer;
+		SharpDX.Direct2D1.DeviceContext _deviceContext;
+
+		#endregion
+
+
+		#region Ctor
 
 		protected TransitionEffect(TransitionInfo info)
 		{
@@ -26,10 +34,16 @@ namespace ScreenSaver.ImageTransitions
 			MaxArea = CalculateMaxArea(BackImage, FrontImage);
 			TransitionTime = info.TransitionTime;
 			StepTime = info.StepTime;
+			_deviceContext = info.DeviceContext;
 
-			Canvas = new Bitmap(MaxArea.Width, MaxArea.Height, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-			((Bitmap)Canvas).SetResolution(BackImage.HorizontalResolution, BackImage.VerticalResolution);
+			//Canvas = new Bitmap(MaxArea.Width, MaxArea.Height, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+			//((Bitmap)Canvas).SetResolution(BackImage.HorizontalResolution, BackImage.VerticalResolution);
 		}
+
+		#endregion
+
+
+		#region Events
 
 		public event EventHandler TransitionStart;
 
@@ -37,13 +51,18 @@ namespace ScreenSaver.ImageTransitions
 
 		public event EventHandler TransitionStop;
 
-		protected Image FrontImage { get; set; }
+		#endregion
 
-		protected Image BackImage { get; set; }
+
+		#region Properties
+
+		protected SharpDX.WIC.BitmapSource FrontImage { get; set; }
+
+		protected SharpDX.WIC.BitmapSource BackImage { get; set; }
 
 		protected Image Canvas { get; set; }
 
-		protected Rectangle ClientArea { get; set; }
+		protected SharpDX.RectangleF ClientArea { get; set; }
 
 		protected int TransitionTime { get; set; }
 
@@ -57,51 +76,69 @@ namespace ScreenSaver.ImageTransitions
 
 		public TransitionState State { get; protected set; }
 
-		public Rectangle MaxArea { get; protected set; }
+		public SharpDX.RectangleF MaxArea { get; protected set; }
 
 		protected object SyncRoot { get; private set; }
 
-		private Rectangle CalculateMaxArea(Image img1, Image img2)
+		#endregion
+
+
+		#region Methods
+
+		private SharpDX.RectangleF CalculateMaxArea(SharpDX.WIC.BitmapSource img1, SharpDX.WIC.BitmapSource img2)
 		{
-			var rc1 = new Rectangle(Point.Empty, img1.Size);
+			var rc1 = new SharpDX.RectangleF(0, 0, img1.Size.Width, img1.Size.Height);
 			ResizeAndCenter(ref rc1);
-			var rc2 = new Rectangle(Point.Empty, img2.Size);
+			var rc2 = new SharpDX.RectangleF(0, 0, img2.Size.Width, img2.Size.Height);
 			ResizeAndCenter(ref rc2);
 
-			return new Rectangle(new Point(Math.Min(rc1.X, rc2.X), Math.Min(rc1.Y, rc2.Y)),
-				new Size(Math.Max(rc1.Width, rc2.Width), Math.Max(rc1.Height, rc2.Height)));
+			return new SharpDX.RectangleF(Math.Min(rc1.X, rc2.X), Math.Min(rc1.Y, rc2.Y),
+				Math.Max(rc1.Width, rc2.Width), Math.Max(rc1.Height, rc2.Height));
 		}
 
-		protected void ResizeAndCenter(ref Rectangle bounds, Rectangle? area = null)
+		protected void ResizeAndCenter(ref SharpDX.RectangleF bounds, SharpDX.RectangleF? area = null)
 		{
 			var rc = area ?? ClientArea;
 			var maxSize = rc.Size;
-			var ratio = Math.Min((double)maxSize.Width / bounds.Width, (double)maxSize.Height / bounds.Height);
-			var newSize = new Size((int)(bounds.Width * ratio), (int)(bounds.Height * ratio));
+			var ratio = Math.Min((float)maxSize.Width / bounds.Width, (float)maxSize.Height / bounds.Height);
+			var newSize = new SharpDX.Size2F(bounds.Width * ratio, bounds.Height * ratio);
 
-			var cx = (rc.Width - newSize.Width) / 2;
-			var cy = (rc.Height - newSize.Height) / 2;
+			var cx = (rc.Width - newSize.Width) / 2f;
+			var cy = (rc.Height - newSize.Height) / 2f;
 
-			bounds.Location = new Point(cx, cy);
+			bounds.Location = new SharpDX.Vector2(cx, cy);
 			bounds.Size = newSize;
 		}
 
-		public virtual void Draw(System.Windows.Forms.PaintEventArgs e)
+		public void Draw(SharpDX.Direct2D1.DeviceContext deviceContext)
 		{
-			lock (SyncRoot)
-			{
-				if (Canvas == null)
-					return;
+			if (deviceContext == null)
+				throw new ArgumentNullException("deviceContext");
 
-				e.Graphics.DrawImage(Canvas, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
-			}
+			deviceContext.BeginDraw();
+
+			DoDraw(deviceContext);
+
+			deviceContext.EndDraw();
 		}
+
+		protected abstract void DoDraw(SharpDX.Direct2D1.DeviceContext deviceContext);
 
 		private void DoRaiseEvent(TransitionState state, EventHandler handler)
 		{
 			lock (SyncRoot)
 			{
 				State = state;
+
+				try
+				{
+					Draw(_deviceContext);
+				}
+				catch (Exception e)
+				{
+					System.Diagnostics.Debug.WriteLine("Something went wrong! {0}", e);
+				}
+
 				if (handler == null)
 					return;
 
@@ -134,9 +171,13 @@ namespace ScreenSaver.ImageTransitions
 		public virtual void Start()
 		{
 			lock (SyncRoot)
+			{
 				OnStart();
 
-			State = TransitionState.Transitioning;
+				TickTimer = new System.Timers.Timer(StepTime);
+				TickTimer.Elapsed += TimerTick;
+				TickTimer.Start();
+			}
 		}
 
 		public virtual void Step()
@@ -159,7 +200,6 @@ namespace ScreenSaver.ImageTransitions
 				{
 					TickTimer.Stop();
 					TickTimer.Dispose();
-					State = TransitionState.Finished;
 				}
 
 				OnStop();
@@ -173,6 +213,8 @@ namespace ScreenSaver.ImageTransitions
 				lock (SyncRoot)
 				{
 					TickTimer.Stop();
+					if (State == TransitionState.Started)
+						State = TransitionState.Transitioning;
 					if (State == TransitionState.Transitioning)
 						Step();
 					TickTimer.Start();
@@ -214,5 +256,7 @@ namespace ScreenSaver.ImageTransitions
 					return Create(effects, info);
 			}
 		}
+
+		#endregion
 	}
 }

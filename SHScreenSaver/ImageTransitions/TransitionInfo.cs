@@ -4,16 +4,18 @@
 	{
 		public static readonly TransitionInfo Empty = new TransitionInfo();
 
-		public System.Drawing.Rectangle WorkingArea { get; set; }
+		public SharpDX.RectangleF WorkingArea { get; set; }
 
-		public System.Drawing.Image BackImage { get; set; }
+		public SharpDX.WIC.BitmapSource BackImage { get; set; }
 
-		public System.Drawing.Image FrontImage { get; set; }
+		public SharpDX.WIC.BitmapSource FrontImage { get; set; }
 
 		public int StepTime { get; set; }
 
 		public int TransitionTime { get; set; }
 
 		public bool RandomizeEffect { get; set; }
+
+		public SharpDX.Direct2D1.DeviceContext DeviceContext { get; set; }
 	}
 }

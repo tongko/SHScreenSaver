@@ -25,5 +25,16 @@ namespace ScreenSaver
 				list[n] = value;
 			}
 		}
+
+		public static SharpDX.RectangleF ToDxRectangleF(this System.Drawing.Rectangle rc)
+		{
+			return new SharpDX.RectangleF(rc.X, rc.Y, rc.Width, rc.Height);
+		}
+
+		public static SharpDX.Mathematics.Interop.RawRectangleF ToRawRectangleF(this SharpDX.RectangleF rc)
+		{
+			return new SharpDX.Mathematics.Interop.RawRectangleF(rc.Left, rc.Top, rc.Right, rc.Bottom);
+		}
+
 	}
 }

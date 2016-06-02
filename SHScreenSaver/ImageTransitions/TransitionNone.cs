@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-
-namespace ScreenSaver.ImageTransitions
+﻿namespace ScreenSaver.ImageTransitions
 {
 	class TransitionNone : TransitionEffect
 	{
@@ -9,27 +7,27 @@ namespace ScreenSaver.ImageTransitions
 		{
 		}
 
-		public override void Draw(System.Windows.Forms.PaintEventArgs e)
+		protected override void DoDraw(SharpDX.Direct2D1.DeviceContext deviceContext)
 		{
-			lock (SyncRoot)
-			{
-				var g = Graphics.FromImage(Canvas);
-				g.Clear(Color.Black);
+			//lock (SyncRoot)
+			//{
+			//	var g = Graphics.FromImage(Canvas);
+			//	g.Clear(Color.Black);
 
-				var rect = new Rectangle(Point.Empty, BackImage.Size);
-				ResizeAndCenter(ref rect);
+			//	var rect = new Rectangle(Point.Empty, BackImage.Size);
+			//	ResizeAndCenter(ref rect);
 
-				g.DrawImage(BackImage, rect);
-			}
+			//	g.DrawImage(BackImage, rect);
+			//}
 
-			base.Draw(e);
+			//base.Draw(e);
 		}
 
 		public override void Start()
 		{
-			base.Start();
+			//base.Start();
 
-			Stop();
+			//Stop();
 		}
 	}
 }

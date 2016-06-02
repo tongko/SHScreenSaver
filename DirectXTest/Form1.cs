@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Windows.Forms;
 using SharpDX;
-using SharpDX.Direct3D;
 using SharpDX.Direct2D1;
-using SharpDX.Direct3D11;
+using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using SharpDX.IO;
 using SharpDX.WIC;
@@ -22,6 +21,7 @@ namespace DirectXTest
 	{
 		private object _sync = new object();
 		System.Timers.Timer _timer;
+
 		D2DDevice _d2dDevice = null;
 		D2DDeviceContext _d2dContext = null;
 		SwapChain1 _swapChain;
@@ -52,7 +52,7 @@ namespace DirectXTest
 			_timer = new System.Timers.Timer(3000);
 			_timer.Elapsed += TimerTick;
 
-			_paths = new List<string>(System.IO.Directory.GetFiles(@"D:\Users\tongko\Pictures\"));
+			_paths = new List<string>(System.IO.Directory.GetFiles(@"C:\Users\liew343241\Pictures\刘琦宝贝\"));
 
 			InitDirectDraw();
 		}
@@ -213,8 +213,8 @@ namespace DirectXTest
 					_d2dContext.Clear(new SharpDX.Mathematics.Interop.RawColor4(0f, 0f, 0f, 255f));
 
 					// Calculate the center of the screen
-					int halfWidth = _swapChain.Description.ModeDescription.Width / 2;
-					int halfHeight = _swapChain.Description.ModeDescription.Height / 2;
+					//int halfWidth = _swapChain.Description.ModeDescription.Width / 2;
+					//int halfHeight = _swapChain.Description.ModeDescription.Height / 2;
 
 					// Translate the origin of coordinates for drawing the bitmap filled rectangle
 					//_d2dContext.Transform = Matrix3x2.Translation(halfWidth - 350, halfHeight);
@@ -223,7 +223,7 @@ namespace DirectXTest
 					var maxArea = new RectangleF(0f, 0f, Size.Width, Size.Height);
 					ResizeAndCenter(ref bmpRc, maxArea);
 					_d2dContext.DrawBitmap(_d2dSource, bmpRc, 1f, SharpDX.Direct2D1.BitmapInterpolationMode.Linear);
-					
+
 					//_d2dContext.DrawImage(_d2dSource);
 
 					// Translate again for drawing the player bitmap

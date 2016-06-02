@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScreenSaver", "SHScreenSaver\ScreenSaver.csproj", "{36E07BF4-8628-4AA7-9AA6-428F9BA7F192}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScreenSaverLib", "ScreenSaverLib\ScreenSaverLib.csproj", "{46021EB2-305F-4B91-90E2-4B392BD0A4B4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DirectXTest", "DirectXTest\DirectXTest.csproj", "{30F39F5C-5D38-424A-BE72-B957DBE0828F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DirectXLibs", "DirectXLibs\DirectXLibs.csproj", "{73F37B77-5F62-48A9-9EC6-4FEF57575F70}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,14 @@ Global
 		{30F39F5C-5D38-424A-BE72-B957DBE0828F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{30F39F5C-5D38-424A-BE72-B957DBE0828F}.Release|x64.ActiveCfg = Release|Any CPU
 		{30F39F5C-5D38-424A-BE72-B957DBE0828F}.Release|x64.Build.0 = Release|Any CPU
+		{73F37B77-5F62-48A9-9EC6-4FEF57575F70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73F37B77-5F62-48A9-9EC6-4FEF57575F70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73F37B77-5F62-48A9-9EC6-4FEF57575F70}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{73F37B77-5F62-48A9-9EC6-4FEF57575F70}.Debug|x64.Build.0 = Debug|Any CPU
+		{73F37B77-5F62-48A9-9EC6-4FEF57575F70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73F37B77-5F62-48A9-9EC6-4FEF57575F70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73F37B77-5F62-48A9-9EC6-4FEF57575F70}.Release|x64.ActiveCfg = Release|Any CPU
+		{73F37B77-5F62-48A9-9EC6-4FEF57575F70}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

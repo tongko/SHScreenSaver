@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Drawing;
 using System.Drawing.Imaging;
-using System.Windows.Forms;
 
 namespace ScreenSaver.ImageTransitions
 {
@@ -25,10 +23,8 @@ namespace ScreenSaver.ImageTransitions
 			{
 				_backMatrix.Matrix33 = 1F;
 				_frontMatrix.Matrix33 = 0F;
-				TickTimer = new System.Timers.Timer(StepTime);
-				TickTimer.Elapsed += TimerTick;
-				TickTimer.Start();
 			}
+
 			base.Start();
 		}
 
@@ -38,47 +34,44 @@ namespace ScreenSaver.ImageTransitions
 			{
 				_fade = Math.Min(1F, (float)CurrentStep / TransitionTime);
 				_backMatrix.Matrix33 = 1F - (_frontMatrix.Matrix33 = _fade);
-				State = TransitionState.Transitioning;
 			}
 
 			base.Step();
 		}
 
-		public override void Draw(PaintEventArgs e)
+		protected override void DoDraw(SharpDX.Direct2D1.DeviceContext deviceContext)
 		{
 			lock (SyncRoot)
 			{
-				Canvas = new Bitmap(MaxArea.Width, MaxArea.Height, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-				((Bitmap)Canvas).SetResolution(BackImage.HorizontalResolution, BackImage.VerticalResolution);
-				var g = Graphics.FromImage(Canvas);
-				//g.Clear(Color.Black);
+				//deviceContext.Clear(new SharpDX.Mathematics.Interop.RawColor4(0f, 0f, 0f, 255f));
 
-				var rectBack = new Rectangle(Point.Empty, BackImage.Size);
-				ResizeAndCenter(ref rectBack);
-				var rectFront = new Rectangle(Point.Empty, FrontImage.Size);
-				ResizeAndCenter(ref rectFront);
+				//var rectBack = new SharpDX.RectangleF(0f, 0f, BackImage.Size.Width, BackImage.Size.Height);
+				//ResizeAndCenter(ref rectBack);
+				//var rectFront = new SharpDX.RectangleF(0f, 0f, FrontImage.Size.Width, FrontImage.Size.Height);
+				//ResizeAndCenter(ref rectFront);
 
-				if (State == TransitionState.Transitioning)
-				{
-					var imgAttr = new ImageAttributes();
-					if (BackImage != null)
-					{
-						imgAttr.SetColorMatrix(_backMatrix);
-						g.DrawImage(BackImage, rectBack, 0, 0, BackImage.Width, BackImage.Height, GraphicsUnit.Pixel, imgAttr);
-					}
-					if (FrontImage != null)
-					{
-						imgAttr.SetColorMatrix(_frontMatrix);
-						g.DrawImage(FrontImage, rectFront, 0, 0, FrontImage.Width, FrontImage.Height, GraphicsUnit.Pixel, imgAttr);
-					}
-				}
-				else if (State == TransitionState.Finished)
-					g.DrawImage(FrontImage, rectFront);
-				else
-					g.DrawImage(BackImage, rectBack);
+				//if (State == TransitionState.Transitioning)
+				//{
+				//	var backBmp = SharpDX.Direct2D1.Bitmap.FromWicBitmap(deviceContext, BackImage);
+				//	deviceContext.DrawBitmap(backBmp, rectBack.ToRawRectangleF(),
+				//		_backMatrix.Matrix33, SharpDX.Direct2D1.BitmapInterpolationMode.Linear);
+				//	var frontBmp = SharpDX.Direct2D1.Bitmap.FromWicBitmap(deviceContext, FrontImage);
+				//	deviceContext.DrawBitmap(frontBmp, rectFront.ToRawRectangleF(),
+				//		_frontMatrix.Matrix33, SharpDX.Direct2D1.BitmapInterpolationMode.Linear);
+				//}
+				//else if (State == TransitionState.Finished)
+				//{
+				//	var bmp = SharpDX.Direct2D1.Bitmap.FromWicBitmap(deviceContext, BackImage);
+				//	deviceContext.DrawBitmap(bmp, rectBack.ToRawRectangleF(),
+				//		_backMatrix.Matrix33, SharpDX.Direct2D1.BitmapInterpolationMode.Linear);
+				//}
+				//else
+				//{
+				//	var bmp = SharpDX.Direct2D1.Bitmap.FromWicBitmap(deviceContext, FrontImage);
+				//	deviceContext.DrawBitmap(bmp, rectFront.ToRawRectangleF(),
+				//		_frontMatrix.Matrix33, SharpDX.Direct2D1.BitmapInterpolationMode.Linear);
+				//}
 			}
-
-			base.Draw(e);
 		}
 	}
 }

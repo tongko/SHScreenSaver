@@ -3,9 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace SinHing.ScreenSaver
 {
-	public class Settings
+	public class ScreenSaverSettings
 	{
-		public Settings()
+		public ScreenSaverSettings()
 		{
 			Mode = ScreenSaverMode.FullScreen;
 			InvokeMethod = InvokeMethods.OnTimer;
@@ -17,6 +17,12 @@ namespace SinHing.ScreenSaver
 		public InvokeMethods InvokeMethod { get; set; }
 
 		internal HandleRef ParentHandle { get; private set; }
+
+		public int Interval { get; set; }
+
+		public int InterveneDelay { get; set; }
+
+		public bool SaveAllScreen { get; set; }
 
 		internal void SetScreenSaverMode(ScreenSaverMode mode)
 		{
