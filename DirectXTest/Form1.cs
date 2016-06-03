@@ -41,7 +41,7 @@ namespace DirectXTest
 			InitializeComponent();
 
 			SuspendLayout();
-			WindowState = FormWindowState.Maximized;
+			WindowState = FormWindowState.Normal;
 			FormBorderStyle = FormBorderStyle.None;
 			KeyPreview = true;
 			ResumeLayout(false);

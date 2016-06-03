@@ -36,5 +36,10 @@ namespace ScreenSaver
 			return new SharpDX.Mathematics.Interop.RawRectangleF(rc.Left, rc.Top, rc.Right, rc.Bottom);
 		}
 
+		public static string ToDebugString(this SharpDX.RectangleF rc)
+		{
+			return string.Format("{{l:{0}, t:{1}, r:{2}, b:{3}}}", rc.Left, rc.Top, rc.Right, rc.Bottom);
+		}
+
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using SharpDX;
 using SharpDX.IO;
@@ -26,6 +27,7 @@ namespace ScreenSaver
 		private WIC.BitmapSource _current;
 		private WIC.BitmapSource _next;
 		private WIC.ImagingFactory _factory = new WIC.ImagingFactory();
+		private WIC.BitmapDecoder _bmpDecoder;
 
 		private IntPtr _hwnd;
 
@@ -79,11 +81,12 @@ namespace ScreenSaver
 					// No scaling.
 					Scaling = DXGI.Scaling.None,
 					// Flip between both buffers.
-					SwapEffect = DXGI.SwapEffect.FlipSequential,
+					SwapEffect = DXGI.SwapEffect.FlipSequential
 				};
 
 				dxgiFactory2.MakeWindowAssociation(_hwnd, DXGI.WindowAssociationFlags.IgnoreAll);
 				_swapChain = new DXGI.SwapChain1(dxgiFactory2, device, _hwnd, ref description);
+				_swapChain.IsFullScreen = false;
 
 				_d2Device = new D2D1.Device(dxgiDevice);
 				_deviceContext = new D2D1.DeviceContext(_d2Device, D2D1.DeviceContextOptions.None);
@@ -95,87 +98,94 @@ namespace ScreenSaver
 					D2D1.BitmapOptions.CannotDraw | D2D1.BitmapOptions.Target);
 
 				var backBuffer = _swapChain.GetBackBuffer<DXGI.Surface>(0);
-				System.Diagnostics.Debug.Assert(backBuffer != null);
 				_target = new D2D1.Bitmap1(_deviceContext, backBuffer, _bmpProperties);
-				System.Diagnostics.Debug.Assert(_target.NativePointer != IntPtr.Zero);
+				_deviceContext.Target = _target;
 			}
 		}
 
 		public void DoPaint()
 		{
+			Debug.WriteLine("Begin Paint:");
+			Debug.Indent();
+
 			var deviceContext = _deviceContext;
 			deviceContext.BeginDraw();
-
-			var bmp = GetBitmap(GetNextIndex()); //GetWICImage(GetNextIndex());
 			deviceContext.Clear(new SharpDX.Mathematics.Interop.RawColor4(0f, 0f, 0f, 1f));
-			var rectBack = new SharpDX.RectangleF(0f, 0f, bmp.Size.Width, bmp.Size.Height);
-			ResizeAndCenter(ref rectBack);
 
-			//var image = SharpDX.Direct2D1.Bitmap1.FromWicBitmap(deviceContext, bmp);
-			deviceContext.DrawBitmap(bmp, rectBack, 1f, SharpDX.Direct2D1.BitmapInterpolationMode.Linear);
+			var bmp = GetWICImage(GetNextIndex());
+			var rectBack = new RectangleF(0f, 0f, bmp.Size.Width, bmp.Size.Height);
+			Debug.WriteLine("Before resize and center: {0}", new object[] { rectBack.ToDebugString() });
+			ResizeAndCenter(ref rectBack);
+			Debug.WriteLine("After resize and center:  {0}", new object[] { rectBack.ToDebugString() });
+
+			var image = D2D1.Bitmap1.FromWicBitmap(deviceContext, bmp);
+			deviceContext.DrawBitmap(image, rectBack, 1f, D2D1.BitmapInterpolationMode.Linear);
 
 			deviceContext.EndDraw();
 
-			var rc = MaxPaintArea.ToRawRectangleF(); //rectBack;
-			var parameter = new DXGI.PresentParameters
-			{
-				DirtyRectangles = new[] {
-					new SharpDX.Mathematics.Interop.RawRectangle((int)rc.Left, (int)rc.Top, (int)rc.Right, (int)rc.Bottom) },
-				ScrollOffset = new SharpDX.Mathematics.Interop.RawPoint(0, 0),
-			};
+			//var rc = rectBack; //.ToRawRectangleF(); //rectBack;
+			//var parameter = new DXGI.PresentParameters
+			//{
+			//	DirtyRectangles = new[] {
+			//		new SharpDX.Mathematics.Interop.RawRectangle(
+			//			(int)rc.Left, (int)rc.Top, (int)rc.Right, (int)rc.Bottom) },
+			//	ScrollOffset = new SharpDX.Mathematics.Interop.RawPoint(0, 0),
+			//};
 
-			_swapChain.Present(1, DXGI.PresentFlags.DoNotWait, parameter);
+			_swapChain.Present(1, DXGI.PresentFlags.None);
+			//_swapChain.Present(1, DXGI.PresentFlags.DoNotWait, parameter);
+
+			Debug.Unindent();
+			Debug.WriteLine("End Paint.");
 		}
 
-		private SharpDX.Direct2D1.Bitmap1 GetBitmap(int index)
-		{
-			var idx = index;
-			SharpDX.Direct2D1.Bitmap1 bmp = null;
-			WIC.FormatConverter converter = null;
-			NativeFileStream fileStream = null;
-			WIC.BitmapDecoder bitmapDecoder = null;
+		//private SharpDX.Direct2D1.Bitmap1 GetBitmap(int index)
+		//{
+		//	var idx = index;
+		//	SharpDX.Direct2D1.Bitmap1 bmp = null;
+		//	WIC.FormatConverter converter = null;
+		//	NativeFileStream fileStream = null;
 
-			lock (_sync)
-			{
-				while (converter == null)
-				{
-					try
-					{
-						fileStream = new NativeFileStream(_paths[idx], NativeFileMode.Open, NativeFileAccess.Read);
+		//	lock (_sync)
+		//	{
+		//		while (converter == null)
+		//		{
+		//			try
+		//			{
+		//				fileStream = new NativeFileStream(_paths[idx], NativeFileMode.Open, NativeFileAccess.Read);
 
-						bitmapDecoder = new WIC.BitmapDecoder(_factory, fileStream,
-							WIC.DecodeOptions.CacheOnDemand);
-					}
-					catch (Exception)
-					{
-						_paths.RemoveAt(idx);
-						if (_paths.Count == 0)
-							throw new InvalidOperationException("No valid image files specified.");
-						continue;
-					}
-					finally
-					{
-						Utilities.Dispose(ref fileStream);
-					}
+		//				_bmpDecoder = new WIC.BitmapDecoder(_factory, fileStream,
+		//					WIC.DecodeOptions.CacheOnDemand);
+		//			}
+		//			catch (Exception)
+		//			{
+		//				_paths.RemoveAt(idx);
+		//				if (_paths.Count == 0)
+		//					throw new InvalidOperationException("No valid image files specified.");
+		//				continue;
+		//			}
+		//			finally
+		//			{
+		//				Utilities.Dispose(ref fileStream);
+		//			}
 
-					converter = new WIC.FormatConverter(_factory);
-					converter.Initialize(bitmapDecoder.GetFrame(0),
-						WIC.PixelFormat.Format32bppPRGBA);
+		//			converter = new WIC.FormatConverter(_factory);
+		//			converter.Initialize(_bmpDecoder.GetFrame(0),
+		//				WIC.PixelFormat.Format32bppPRGBA);
 
-					bmp = SharpDX.Direct2D1.Bitmap1.FromWicBitmap(_deviceContext, converter);
-					Utilities.Dispose(ref bitmapDecoder);
-				}
-			}
+		//			bmp = D2D1.Bitmap1.FromWicBitmap(_deviceContext, converter);
+		//			//Utilities.Dispose(ref bitmapDecoder);
+		//		}
+		//	}
 
-			return bmp;
-		}
+		//	return bmp;
+		//}
 
 		private WIC.BitmapSource GetWICImage(int index)
 		{
 			var idx = index;
 			WIC.FormatConverter converter = null;
 			NativeFileStream fileStream = null;
-			WIC.BitmapDecoder bitmapDecoder = null;
 
 			lock (_sync)
 			{
@@ -185,7 +195,7 @@ namespace ScreenSaver
 					{
 						fileStream = new NativeFileStream(_paths[idx], NativeFileMode.Open, NativeFileAccess.Read);
 
-						bitmapDecoder = new WIC.BitmapDecoder(_factory, fileStream,
+						_bmpDecoder = new WIC.BitmapDecoder(_factory, fileStream,
 							WIC.DecodeOptions.CacheOnDemand);
 					}
 					catch (Exception)
@@ -201,10 +211,8 @@ namespace ScreenSaver
 					}
 
 					converter = new WIC.FormatConverter(_factory);
-					converter.Initialize(bitmapDecoder.GetFrame(0),
+					converter.Initialize(_bmpDecoder.GetFrame(0),
 						WIC.PixelFormat.Format32bppPRGBA);
-
-					Utilities.Dispose(ref bitmapDecoder);
 				}
 				//				WIC.BitmapSource bmp = null;
 				//RETRY:
