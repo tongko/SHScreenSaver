@@ -40,7 +40,7 @@ namespace ScreenSaver
 			_hwnd = hwnd;
 
 			MaxPaintArea = maxPaintArea.ToDxRectangleF();
-			_paths = GetImagePaths(new[] { @"C:\Users\liew343241\Pictures\刘琦宝贝" });
+			_paths = GetImagePaths(new[] { @"C:\Users\liew343241\Pictures\刘琦宝贝", @"D:\Users\tongko\Pictures" });
 			_paths.Shuffle();
 			_index = 0;
 			DotPerInch = dpi;
@@ -84,7 +84,7 @@ namespace ScreenSaver
 					SwapEffect = DXGI.SwapEffect.FlipSequential
 				};
 
-				dxgiFactory2.MakeWindowAssociation(_hwnd, DXGI.WindowAssociationFlags.IgnoreAll);
+				//dxgiFactory2.MakeWindowAssociation(_hwnd, DXGI.WindowAssociationFlags.IgnoreAll);
 				_swapChain = new DXGI.SwapChain1(dxgiFactory2, device, _hwnd, ref description);
 				_swapChain.IsFullScreen = false;
 
@@ -112,14 +112,30 @@ namespace ScreenSaver
 			deviceContext.BeginDraw();
 			deviceContext.Clear(new SharpDX.Mathematics.Interop.RawColor4(0f, 0f, 0f, 1f));
 
-			var bmp = GetWICImage(GetNextIndex());
+			var idx = GetNextIndex();
+			//var bmp = GetWICImage(GetNextIndex());
+
+			#region TestCode
+
+			var fileStream = new NativeFileStream(_paths[idx], NativeFileMode.Open, NativeFileAccess.Read);
+			_bmpDecoder = new WIC.BitmapDecoder(_factory, fileStream,
+				WIC.DecodeOptions.CacheOnDemand);
+			fileStream.Dispose();
+
+			var converter = new WIC.FormatConverter(_factory);
+			converter.Initialize(_bmpDecoder.GetFrame(0),
+				WIC.PixelFormat.Format32bppPRGBA);
+			var bmp = converter;
+
+			#endregion
+
 			var rectBack = new RectangleF(0f, 0f, bmp.Size.Width, bmp.Size.Height);
 			Debug.WriteLine("Before resize and center: {0}", new object[] { rectBack.ToDebugString() });
 			ResizeAndCenter(ref rectBack);
 			Debug.WriteLine("After resize and center:  {0}", new object[] { rectBack.ToDebugString() });
 
 			var image = D2D1.Bitmap1.FromWicBitmap(deviceContext, bmp);
-			deviceContext.DrawBitmap(image, rectBack, 1f, D2D1.BitmapInterpolationMode.Linear);
+			deviceContext.DrawBitmap(image, rectBack, 1.0f, D2D1.BitmapInterpolationMode.Linear);
 
 			deviceContext.EndDraw();
 
