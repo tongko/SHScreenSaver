@@ -85,7 +85,7 @@ namespace SinHing.ScreenSaver
 					InternalLoop();
 					break;
 				case ScreenSaverMode.Debug:
-					var dv = new ScreenSaverView(0, callbackInfo, IntPtr.Zero, new System.Drawing.Rectangle(50, 50, 640, 360),
+					var dv = new ScreenSaverView(0, callbackInfo, IntPtr.Zero, Screen.PrimaryScreen.Bounds,//new System.Drawing.Rectangle(50, 50, 640, 360),
 						delay, true);
 					dv.Update();
 					InternalLoop();

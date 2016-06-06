@@ -26,6 +26,8 @@ namespace ScreenSaver
 
 		private WIC.BitmapSource _current;
 		private WIC.BitmapSource _next;
+		private NativeFileStream _currFileStream;
+		private NativeFileStream _nextFileStream;
 		private WIC.ImagingFactory _factory = new WIC.ImagingFactory();
 		private WIC.BitmapDecoder _bmpDecoder;
 
@@ -33,6 +35,9 @@ namespace ScreenSaver
 
 		private int _index;
 		private List<string> _paths;
+
+		private float _currOpacity;
+		private float _nextOpacity;
 
 
 		public D2DPainter(IntPtr hwnd, System.Drawing.Rectangle maxPaintArea, System.Drawing.PointF dpi)
@@ -105,103 +110,74 @@ namespace ScreenSaver
 
 		public void DoPaint()
 		{
-			Debug.WriteLine("Begin Paint:");
-			Debug.Indent();
+			var idx = _index;
 
-			var deviceContext = _deviceContext;
-			deviceContext.BeginDraw();
-			deviceContext.Clear(new SharpDX.Mathematics.Interop.RawColor4(0f, 0f, 0f, 1f));
+			if (_currFileStream != null)
+				_currFileStream.Dispose();
+			_current = GetWICImage(idx, ref _currFileStream);
+			var currBmp = D2D1.Bitmap1.FromWicBitmap(_deviceContext, _current);
+			var rcCurr = new RectangleF(0f, 0f, currBmp.Size.Width, currBmp.Size.Height);
+			ResizeAndCenter(ref rcCurr, MaxPaintArea);
 
-			var idx = GetNextIndex();
-			//var bmp = GetWICImage(GetNextIndex());
+			if (_nextFileStream != null)
+				_nextFileStream.Dispose();
+			_next = GetWICImage(GetNextIndex(), ref _currFileStream);
+			var nextBmp = D2D1.Bitmap1.FromWicBitmap(_deviceContext, _next);
+			var rcNext = new RectangleF(0f, 0f, nextBmp.Size.Width, nextBmp.Size.Height);
+			ResizeAndCenter(ref rcNext, MaxPaintArea);
 
-			#region TestCode
+			_deviceContext.BeginDraw();
 
-			var fileStream = new NativeFileStream(_paths[idx], NativeFileMode.Open, NativeFileAccess.Read);
-			_bmpDecoder = new WIC.BitmapDecoder(_factory, fileStream,
-				WIC.DecodeOptions.CacheOnDemand);
-			fileStream.Dispose();
+			_deviceContext.Clear(new SharpDX.Mathematics.Interop.RawColor4(0f, 0f, 0f, 1f));
+			_deviceContext.DrawBitmap(currBmp, rcCurr, 1.0f, D2D1.BitmapInterpolationMode.Linear);
 
-			var converter = new WIC.FormatConverter(_factory);
-			converter.Initialize(_bmpDecoder.GetFrame(0),
-				WIC.PixelFormat.Format32bppPRGBA);
-			var bmp = converter;
-
-			#endregion
-
-			var rectBack = new RectangleF(0f, 0f, bmp.Size.Width, bmp.Size.Height);
-			Debug.WriteLine("Before resize and center: {0}", new object[] { rectBack.ToDebugString() });
-			ResizeAndCenter(ref rectBack);
-			Debug.WriteLine("After resize and center:  {0}", new object[] { rectBack.ToDebugString() });
-
-			var image = D2D1.Bitmap1.FromWicBitmap(deviceContext, bmp);
-			deviceContext.DrawBitmap(image, rectBack, 1.0f, D2D1.BitmapInterpolationMode.Linear);
-
-			deviceContext.EndDraw();
-
-			//var rc = rectBack; //.ToRawRectangleF(); //rectBack;
-			//var parameter = new DXGI.PresentParameters
-			//{
-			//	DirtyRectangles = new[] {
-			//		new SharpDX.Mathematics.Interop.RawRectangle(
-			//			(int)rc.Left, (int)rc.Top, (int)rc.Right, (int)rc.Bottom) },
-			//	ScrollOffset = new SharpDX.Mathematics.Interop.RawPoint(0, 0),
-			//};
-
+			_deviceContext.EndDraw();
 			_swapChain.Present(1, DXGI.PresentFlags.None);
-			//_swapChain.Present(1, DXGI.PresentFlags.DoNotWait, parameter);
 
-			Debug.Unindent();
-			Debug.WriteLine("End Paint.");
+			_currOpacity = 1.0f;
+			_nextOpacity = 0.01f;
+			float currStep = 0f, stepTime = 1000f / 60f;
+			var timer = new System.Timers.Timer(stepTime);
+			timer.Elapsed += (o, e) =>
+			{
+				timer.Stop();
+				lock (_sync)
+				{
+					var fade = Math.Min(1f, (float)currStep / 1000f);
+					_currOpacity = 1f - (_nextOpacity = fade);
+					currStep += stepTime;
+				}
+				if (currStep > 1000f)
+					_nextOpacity = 2.0f;
+				else
+					timer.Start();
+			};
+			timer.Start();
+
+			while (_nextOpacity <= 1.0f)
+			{
+				lock (_sync)
+				{
+					_deviceContext.BeginDraw();
+					_deviceContext.Clear(new SharpDX.Mathematics.Interop.RawColor4(0f, 0f, 0f, 1f));
+					_deviceContext.DrawBitmap(currBmp, rcCurr, _currOpacity, D2D1.BitmapInterpolationMode.Linear);
+					_deviceContext.DrawBitmap(nextBmp, rcNext, _nextOpacity, D2D1.BitmapInterpolationMode.Linear);
+					_deviceContext.EndDraw();
+					_swapChain.Present(1, DXGI.PresentFlags.None);
+				}
+			}
+
+			_deviceContext.BeginDraw();
+			_deviceContext.Clear(new SharpDX.Mathematics.Interop.RawColor4(0f, 0f, 0f, 1f));
+			_deviceContext.DrawBitmap(nextBmp, rcNext, 1.0f, D2D1.BitmapInterpolationMode.Linear);
+			_deviceContext.EndDraw();
+			_swapChain.Present(1, DXGI.PresentFlags.None);
 		}
 
-		//private SharpDX.Direct2D1.Bitmap1 GetBitmap(int index)
-		//{
-		//	var idx = index;
-		//	SharpDX.Direct2D1.Bitmap1 bmp = null;
-		//	WIC.FormatConverter converter = null;
-		//	NativeFileStream fileStream = null;
-
-		//	lock (_sync)
-		//	{
-		//		while (converter == null)
-		//		{
-		//			try
-		//			{
-		//				fileStream = new NativeFileStream(_paths[idx], NativeFileMode.Open, NativeFileAccess.Read);
-
-		//				_bmpDecoder = new WIC.BitmapDecoder(_factory, fileStream,
-		//					WIC.DecodeOptions.CacheOnDemand);
-		//			}
-		//			catch (Exception)
-		//			{
-		//				_paths.RemoveAt(idx);
-		//				if (_paths.Count == 0)
-		//					throw new InvalidOperationException("No valid image files specified.");
-		//				continue;
-		//			}
-		//			finally
-		//			{
-		//				Utilities.Dispose(ref fileStream);
-		//			}
-
-		//			converter = new WIC.FormatConverter(_factory);
-		//			converter.Initialize(_bmpDecoder.GetFrame(0),
-		//				WIC.PixelFormat.Format32bppPRGBA);
-
-		//			bmp = D2D1.Bitmap1.FromWicBitmap(_deviceContext, converter);
-		//			//Utilities.Dispose(ref bitmapDecoder);
-		//		}
-		//	}
-
-		//	return bmp;
-		//}
-
-		private WIC.BitmapSource GetWICImage(int index)
+		private WIC.BitmapSource GetWICImage(int index, ref NativeFileStream fileStream)
 		{
 			var idx = index;
 			WIC.FormatConverter converter = null;
-			NativeFileStream fileStream = null;
 
 			lock (_sync)
 			{
@@ -221,38 +197,11 @@ namespace ScreenSaver
 							throw new InvalidOperationException("No valid image files specified.");
 						continue;
 					}
-					finally
-					{
-						Utilities.Dispose(ref fileStream);
-					}
 
 					converter = new WIC.FormatConverter(_factory);
 					converter.Initialize(_bmpDecoder.GetFrame(0),
 						WIC.PixelFormat.Format32bppPRGBA);
 				}
-				//				WIC.BitmapSource bmp = null;
-				//RETRY:
-				//				try
-				//				{
-				//					while (bmp == null)
-				//					{
-				//						var imgFactory = new WIC.ImagingFactory();
-				//						var decoder = new WIC.BitmapDecoder(imgFactory,
-				//							_paths[idx], WIC.DecodeOptions.CacheOnDemand);
-				//						var convertor = new WIC.FormatConverter(imgFactory);
-				//						convertor.Initialize(decoder.GetFrame(0),
-				//							WIC.PixelFormat.Format32bppPRGBA);
-
-				//						bmp = convertor;
-				//					}
-				//				}
-				//				catch (Exception)
-				//				{
-				//					_paths.RemoveAt(idx);
-				//					if (_paths.Count == 0)
-				//						throw new InvalidOperationException("No valid image files specified.");
-				//					goto RETRY;
-				//				}
 
 				return converter;
 			}

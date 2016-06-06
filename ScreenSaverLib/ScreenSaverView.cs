@@ -209,11 +209,11 @@ namespace SinHing.ScreenSaver
 				if (_debugMode)
 				{
 					Handle = Unsafe.CreateWindowEx(Unsafe.WS_EX_APPWINDOW, WndClassName, null,
-						Unsafe.WS_POPUP, 50, 50, 640, 360, IntPtr.Zero, IntPtr.Zero, HInstance, IntPtr.Zero);
+						Unsafe.WS_POPUP, _location.X, _location.Y, _size.Width, _size.Height, IntPtr.Zero, IntPtr.Zero, HInstance, IntPtr.Zero);
 				}
 				else
 					Handle = Unsafe.CreateWindowEx(Unsafe.WS_EX_TOPMOST, WndClassName, null,
-						  Unsafe.WS_POPUP, 0, 0, _size.Width, _size.Height, Parent, IntPtr.Zero,
+						  Unsafe.WS_POPUP, _location.X, _location.Y, _size.Width, _size.Height, Parent, IntPtr.Zero,
 						  HInstance, IntPtr.Zero);
 			}
 			if (Handle == IntPtr.Zero)

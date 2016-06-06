@@ -5,15 +5,6 @@ namespace ScreenSaver
 {
 	class Painter : System.IDisposable
 	{
-		//private const int DCX_WINDOW = 0x00000001;
-		//private const int DCX_CACHE = 0x00000002;
-		//private const int DCX_LOCKWINDOWUPDATE = 0x00000400;
-
-		//[DllImport("user32.dll")]
-		//private static extern IntPtr GetDCEx(IntPtr hwnd, IntPtr hrgn, uint flags);
-		//[DllImport("user32.dll")]
-		//private static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
-
 		private D2DPainter _p;
 
 		public Painter(ScreenSaverView view)
@@ -28,26 +19,6 @@ namespace ScreenSaver
 		public void DoPainting()
 		{
 			_p.DoPaint();
-			//IntPtr handle = IntPtr.Zero, hdc = IntPtr.Zero;
-			//try
-			//{
-			//	handle = View.Handle;
-			//	hdc = GetDCEx(handle, IntPtr.Zero, DCX_WINDOW | DCX_CACHE | DCX_LOCKWINDOWUPDATE);
-			//	using (var g = Graphics.FromHdc(hdc))
-			//	{
-			//		g.Clear(Color.Black);
-			//		g.DrawString("Hello World", new Font("Arial", 11f),
-			//			Brushes.Orange, new PointF(15f, 15f));
-			//	}
-			//}
-			//catch (Exception e)
-			//{
-			//	System.Windows.Forms.MessageBox.Show(e.ToString());
-			//}
-			//finally
-			//{
-			//	ReleaseDC(handle, hdc);
-			//}
 		}
 
 		#region IDisposable Support

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 
 using SharpDX;
+using SharpDX.IO;
 
 namespace ScreenSaver.ImageTransitions
 {
@@ -40,6 +41,8 @@ namespace ScreenSaver.ImageTransitions
 
 		private D2D1.Bitmap1 _target;
 
+		private NativeFileStream _currentFileStream;
+		private NativeFileStream _nextFileStream;
 		private WIC.BitmapSource _current;
 		private WIC.BitmapSource _next;
 
@@ -140,9 +143,8 @@ namespace ScreenSaver.ImageTransitions
 					D2D1.BitmapOptions.CannotDraw | D2D1.BitmapOptions.Target);
 
 				var backBuffer = _swapChain.GetBackBuffer<DXGI.Surface>(0);
-				System.Diagnostics.Debug.Assert(backBuffer != null);
 				_target = new D2D1.Bitmap1(_deviceContext, backBuffer, _bmpProperties);
-				System.Diagnostics.Debug.Assert(_target.NativePointer != IntPtr.Zero);
+				_deviceContext.Target = _target;
 			}
 		}
 
