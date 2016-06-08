@@ -30,7 +30,6 @@ namespace SinHing.ScreenSaver
 
 		internal ScreenSaverView(int seq, CallbackInfo callback, IntPtr parent, Rectangle bounds, int delay, bool debug = false)
 		{
-			System.Diagnostics.Debug.WriteLine("Timer interval: {0}", delay);
 			Sequence = seq;
 			_callback = callback;
 			HInstance = System.Diagnostics.Process.GetCurrentProcess().Handle;
@@ -273,7 +272,6 @@ namespace SinHing.ScreenSaver
 			switch (msg)
 			{
 				case Unsafe.WM_SETFOCUS:
-					System.Diagnostics.Debug.WriteLine("Apps get focus.");
 					break;
 				case Unsafe.WM_MOUSEMOVE:
 					if (IsPreview || _debugMode)
@@ -290,18 +288,9 @@ namespace SinHing.ScreenSaver
 							Close();
 					}
 					break;
-				case Unsafe.WM_ACTIVATE:
-					if (Unsafe.LOWORD(wParam) == 0)
-						Close();
-					break;
-				case Unsafe.WM_ACTIVATEAPP:
-					if (wParam == UIntPtr.Zero)
-						Close();
-					break;
 				case Unsafe.WM_COMMAND:
 				case Unsafe.WM_SYSKEYDOWN:
 				case Unsafe.WM_KEYDOWN:
-					System.Diagnostics.Debug.WriteLine("Key down!");
 					if (IsPreview)
 						break;
 					if (_debugMode)
@@ -318,7 +307,6 @@ namespace SinHing.ScreenSaver
 					Unsafe.BeginPaint(hwnd, out ps);
 
 					DoRaiseEvent(this, _callback.TimerCallback, _eventArgs);
-					System.Diagnostics.Debug.WriteLine("WM_PAINT fired. IsPreview: {0}, IsDebug: {1}", IsPreview, _debugMode);
 
 					Unsafe.EndPaint(hwnd, ref ps);
 					break;

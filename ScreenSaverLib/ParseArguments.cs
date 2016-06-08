@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace SinHing.ScreenSaver
 {
@@ -38,7 +40,19 @@ namespace SinHing.ScreenSaver
 					return;
 
 				int pointer;
-				if (arguments.Count < 2 || !int.TryParse(arguments[1], out pointer))
+				if (arguments.Count < 2 && arguments[0].Length > 2)
+				{
+					var handleString = Regex.Match(arguments[0], @"\d+").Value;
+					if (!int.TryParse(handleString, out pointer))
+					{
+						Trace.WriteLine(string.Format("[{0}] Invalid arguments specified: '{1}'.",
+							DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), arguments[0]));
+						throw new ArgumentException("Invalid arguments specified.", "args");
+					}
+				}
+				else if (arguments.Count < 2 && arguments[0].Length < 3)
+					throw new ArgumentException("Invalid arguments specified.", "args");
+				else if (!int.TryParse(arguments[1], out pointer))
 					throw new ArgumentException("Invalid arguments specified.", "args");
 
 				_settings.SetParentHandle(new System.Runtime.InteropServices.HandleRef(null, new IntPtr(pointer)));

@@ -82,6 +82,7 @@ namespace SinHing.ScreenSaver
 						sv.Update();
 					}
 
+					Unsafe.ShowCursor(false);
 					InternalLoop();
 					break;
 				case ScreenSaverMode.Debug:

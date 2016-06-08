@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using SharpDX;
 using SharpDX.IO;
@@ -13,7 +12,7 @@ namespace ScreenSaver
 	using DXGI = SharpDX.DXGI;
 	using WIC = SharpDX.WIC;
 
-	class D2DPainter
+	class D2DPainter : IDisposable
 	{
 		private object _sync = new object();
 
@@ -121,7 +120,7 @@ namespace ScreenSaver
 
 			if (_nextFileStream != null)
 				_nextFileStream.Dispose();
-			_next = GetWICImage(GetNextIndex(), ref _currFileStream);
+			_next = GetWICImage(GetNextIndex(), ref _nextFileStream);
 			var nextBmp = D2D1.Bitmap1.FromWicBitmap(_deviceContext, _next);
 			var rcNext = new RectangleF(0f, 0f, nextBmp.Size.Width, nextBmp.Size.Height);
 			ResizeAndCenter(ref rcNext, MaxPaintArea);
@@ -172,6 +171,15 @@ namespace ScreenSaver
 			_deviceContext.DrawBitmap(nextBmp, rcNext, 1.0f, D2D1.BitmapInterpolationMode.Linear);
 			_deviceContext.EndDraw();
 			_swapChain.Present(1, DXGI.PresentFlags.None);
+
+			if (_next != null)
+				_next.Dispose();
+			if (_current != null)
+				_current.Dispose();
+			if (currBmp != null)
+				currBmp.Dispose();
+			if (nextBmp != null)
+				nextBmp.Dispose();
 		}
 
 		private WIC.BitmapSource GetWICImage(int index, ref NativeFileStream fileStream)
@@ -201,6 +209,7 @@ namespace ScreenSaver
 					converter = new WIC.FormatConverter(_factory);
 					converter.Initialize(_bmpDecoder.GetFrame(0),
 						WIC.PixelFormat.Format32bppPRGBA);
+					_bmpDecoder.Dispose();
 				}
 
 				return converter;
@@ -247,6 +256,37 @@ namespace ScreenSaver
 
 			return imgPaths;
 		}
+
+		#region IDisposable Support
+		private bool disposedValue = false; // To detect redundant calls
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!disposedValue)
+			{
+				if (disposing)
+				{
+					if (_deviceContext != null)
+						_deviceContext.Dispose();
+					if (_d2Device != null)
+						_d2Device.Dispose();
+					if (_swapChain != null)
+						_swapChain.Dispose();
+					if (_target != null)
+						_target.Dispose();
+				}
+
+				disposedValue = true;
+			}
+		}
+
+		// This code added to correctly implement the disposable pattern.
+		public void Dispose()
+		{
+			Dispose(true);
+		}
+
+		#endregion
 
 
 	}

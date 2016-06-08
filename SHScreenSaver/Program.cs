@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows.Forms;
 using SinHing.ScreenSaver;
 
@@ -29,6 +30,12 @@ namespace ScreenSaver
 			ssApp.DestroyCallback = OnDestroy;
 			ssApp.TimerCallback = OnTimer;
 			ssApp.Run(settings);
+		}
+
+		public static void Log(string message)
+		{
+			Trace.WriteLine(string.Format("[{0}] {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff"),
+				message));
 		}
 
 		private static void OnCreate(object sender, ScreenSaverCallbackEventArgs e)
