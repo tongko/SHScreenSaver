@@ -52,6 +52,12 @@ namespace SinHing.ScreenSaver
 			switch (settings.Mode)
 			{
 				case ScreenSaverMode.ConfigDialog:
+					if (settings.ParentHandle.Handle == IntPtr.Zero)
+					{
+						ConfigDialog.ShowDialog();
+						break;
+					}
+
 					var parent = new System.Windows.Forms.NativeWindow();
 					parent.AssignHandle(settings.ParentHandle.Handle);
 					ConfigDialog.ShowDialog(parent);

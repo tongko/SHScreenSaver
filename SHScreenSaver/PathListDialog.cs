@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ScreenSaver
@@ -82,8 +76,8 @@ namespace ScreenSaver
 				return;
 			}
 
-			lstFolder.Items.Remove(selected[0]);
 			_folders.Remove(selected[0].Text);
+			lstFolder.Items.Remove(selected[0]);
 
 			lstFolder.SelectedIndices.Clear();
 		}

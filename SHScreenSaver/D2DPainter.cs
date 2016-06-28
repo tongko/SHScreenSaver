@@ -44,7 +44,8 @@ namespace ScreenSaver
 			_hwnd = hwnd;
 
 			MaxPaintArea = maxPaintArea.ToDxRectangleF();
-			_paths = GetImagePaths(new[] { @"C:\Users\liew343241\Pictures\刘琦宝贝", @"D:\Users\tongko\Pictures" });
+			var paths = Settings.Instance.ImagePaths;
+			_paths = GetImagePaths(paths);
 			_paths.Shuffle();
 			_index = 0;
 			DotPerInch = dpi;
